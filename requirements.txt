@@ -4,3 +4,5 @@ feedparser
 openai
 requests
 urllib3
+pandas
+numpy
