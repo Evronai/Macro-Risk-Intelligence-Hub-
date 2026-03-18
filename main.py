@@ -19,21 +19,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# Minimal custom styling (optional)
-st.markdown("""
-<style>
-    .stApp { background-color: #f5f7fa; }
-    h1 { color: #1e3c72; }
-    .stButton>button { border-radius: 8px; }
-</style>
-""", unsafe_allow_html=True)
-
 # ==========================================
 # 2. SOURCE REGISTRY (100+ FREE SOURCES)
 # ==========================================
-# Define all data sources in a structured format
-# Each source has: name, type, category, and source-specific parameters
-
 ALL_SOURCES = [
     # ----- COMMODITIES & ENERGY (20 sources) -----
     {"name": "Crude Oil (WTI)", "type": "yfinance", "symbol": "CL=F", "category": "Energy"},
@@ -58,8 +46,6 @@ ALL_SOURCES = [
     {"name": "Lithium", "type": "yfinance", "symbol": "LIT", "category": "Metals"},
 
     # ----- ECONOMIC INDICATORS (25 sources) -----
-    # Using FRED (Federal Reserve) – requires API key, but we can include placeholder.
-    # We'll implement FRED only if API key is provided.
     {"name": "US GDP", "type": "fred", "series_id": "GDP", "category": "Economic"},
     {"name": "US Unemployment Rate", "type": "fred", "series_id": "UNRATE", "category": "Economic"},
     {"name": "US CPI", "type": "fred", "series_id": "CPIAUCSL", "category": "Economic"},
@@ -142,7 +128,7 @@ ALL_SOURCES = [
 class DataSourceManager:
     def __init__(self, sources: List[Dict]):
         self.sources = sources
-        self.cache = {}  # source_name -> (data, timestamp)
+        self.cache = {}
         self.session = requests.Session()
         retry = Retry(total=2, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503])
         adapter = HTTPAdapter(max_retries=retry)
@@ -150,7 +136,6 @@ class DataSourceManager:
         self.session.mount("https://", adapter)
 
     def fetch_source(self, source: Dict) -> Dict:
-        """Fetch a single source based on its type."""
         try:
             if source["type"] == "yfinance":
                 return self._fetch_yfinance(source)
@@ -163,8 +148,7 @@ class DataSourceManager:
             elif source["type"] == "api":
                 return self._fetch_api(source)
             elif source["type"] == "csv":
-                # Placeholder – real CSV download would require parsing
-                return {"note": "CSV source not fully implemented", "data": None}
+                return {"note": "CSV source not fully implemented"}
             else:
                 return {"error": f"Unknown type: {source['type']}"}
         except Exception as e:
@@ -196,7 +180,6 @@ class DataSourceManager:
             return {"error": str(e)}
 
     def _fetch_fred(self, source):
-        # Requires FRED API key set in environment
         api_key = os.environ.get("FRED_API_KEY")
         if not api_key:
             return {"error": "FRED_API_KEY not set"}
@@ -220,11 +203,9 @@ class DataSourceManager:
         return {"error": "No observations"}
 
     def _fetch_tradingeconomics(self, source):
-        # Trading Economics requires API key
         api_key = os.environ.get("TRADINGECONOMICS_API_KEY")
         if not api_key:
             return {"error": "TRADINGECONOMICS_API_KEY not set"}
-        # Simplified – you'd need to construct proper endpoint
         return {"note": "Trading Economics not fully implemented"}
 
     def _fetch_api(self, source):
@@ -238,7 +219,6 @@ class DataSourceManager:
             return {"error": str(e)}
 
     def fetch_selected(self, selected_names: List[str], max_workers=10) -> Dict[str, Dict]:
-        """Fetch selected sources in parallel."""
         results = {}
         sources_to_fetch = [s for s in self.sources if s["name"] in selected_names]
         
@@ -257,20 +237,6 @@ class DataSourceManager:
                     results[name] = {"error": f"Fetch timeout/error: {str(e)}"}
         return results
 
-    def get_cached_or_fetch(self, name: str, max_age=3600):
-        """Get from cache if fresh, else fetch."""
-        if name in self.cache:
-            data, ts = self.cache[name]
-            if time.time() - ts < max_age:
-                return data
-        # Find source
-        src = next((s for s in self.sources if s["name"] == name), None)
-        if not src:
-            return {"error": "Source not found"}
-        data = self.fetch_source(src)
-        self.cache[name] = (data, time.time())
-        return data
-
 # ==========================================
 # 4. INITIALISE SESSION STATE
 # ==========================================
@@ -287,7 +253,6 @@ if "analysis_in_progress" not in st.session_state:
 with st.sidebar:
     st.title("⚙️ Configuration")
     
-    # API Key input (DeepSeek)
     api_key = st.text_input("DeepSeek API Key", type="password")
     if not api_key:
         api_key = os.environ.get("DEEPSEEK_API_KEY")
@@ -304,12 +269,10 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Source selection
     st.subheader("📡 Data Sources")
     categories = list(set(s["category"] for s in ALL_SOURCES))
     selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
     
-    # Filter sources by category
     filtered_sources = ALL_SOURCES
     if selected_category != "All":
         filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
@@ -318,13 +281,11 @@ with st.sidebar:
     selected_sources = st.multiselect(
         "Select sources to fetch",
         options=source_names,
-        default=source_names[:10]  # default to first 10 for performance
+        default=source_names[:10]
     )
     
-    # Update frequency
     update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
     
-    # Fetch button
     if st.button("🔄 Fetch Selected Sources", use_container_width=True):
         with st.spinner(f"Fetching {len(selected_sources)} sources..."):
             results = st.session_state.data_manager.fetch_selected(selected_sources)
@@ -341,19 +302,15 @@ with st.sidebar:
 st.title("🌍 Macro-Risk Intelligence Hub")
 st.markdown("Real‑time economic, energy & geopolitical risk monitoring with 100+ sources")
 
-# Show fetched results if available
 if st.session_state.fetched_results:
     results = st.session_state.fetched_results
     
-    # Organize by category
     categories_in_results = {}
     for src_name, data in results.items():
-        # Find source category
         src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
         cat = src["category"] if src else "Other"
         categories_in_results.setdefault(cat, []).append((src_name, data))
     
-    # Display metrics for price-based sources
     st.subheader("📊 Key Commodity Prices")
     price_sources = [(name, data) for name, data in results.items() 
                      if isinstance(data, dict) and "price" in data]
@@ -369,10 +326,8 @@ if st.session_state.fetched_results:
     else:
         st.info("No price data in current selection")
     
-    # Expandable sections for each category
     for cat, items in categories_in_results.items():
         with st.expander(f"📁 {cat} Sources ({len(items)})", expanded=cat in ["Energy", "Economic"]):
-            # Display in columns
             cols = st.columns(3)
             for i, (name, data) in enumerate(items):
                 with cols[i % 3]:
@@ -387,13 +342,11 @@ if st.session_state.fetched_results:
                     elif "value" in data:
                         st.write(f"Value: {data['value']} ({data.get('date', '')})")
                     elif "data" in data:
-                        # Show a preview
                         preview = str(data["data"])[:100] + "..."
                         st.text(preview)
                     else:
                         st.write("Data available")
     
-    # Analysis modules (simplified from original)
     st.markdown("---")
     st.subheader("🧠 AI Analysis")
     
@@ -404,7 +357,6 @@ if st.session_state.fetched_results:
          "Crypto", "Geopolitical Power"]
     )
     
-    # Map to prompt keys
     prompt_map = {
         "General Macro": "general",
         "Energy & Maritime": "energy",
@@ -426,7 +378,6 @@ if st.session_state.fetched_results:
             
             with st.status("Running analysis...", expanded=True) as status:
                 st.write("📊 Preparing data...")
-                # Build market summary from fetched results
                 market_lines = []
                 news_lines = []
                 for name, data in results.items():
@@ -440,7 +391,7 @@ if st.session_state.fetched_results:
                     elif "value" in data:
                         market_lines.append(f"{name}: {data['value']} ({data.get('date','')})")
                 
-                market_context = "\n".join(market_lines[:20])  # limit tokens
+                market_context = "\n".join(market_lines[:20])
                 news_context = "\n".join(news_lines[:10])
                 
                 st.write("🧠 Calling DeepSeek API...")
@@ -483,7 +434,6 @@ if st.session_state.fetched_results:
             st.markdown("### 🧠 Strategic Briefing")
             st.markdown(report)
             
-            # Download button
             st.download_button(
                 label="📥 Download Briefing",
                 data=report,
