@@ -2,3 +2,5 @@ streamlit
 yfinance
 feedparser
 openai
+requests
+urllib3
