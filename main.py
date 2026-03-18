@@ -22,104 +22,508 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. CUSTOM CSS FOR TERMINAL LOOK
+# 2. CUSTOM CSS — BIG 4 PROFESSIONAL THEME
 # ==========================================
 st.markdown("""
 <style>
-    /* Terminal dark theme */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap');
+
+    /* ── CSS Variables ── */
+    :root {
+        --bg-primary: #f7f8fa;
+        --bg-secondary: #ffffff;
+        --bg-sidebar: #1a2340;
+        --bg-sidebar-hover: #243058;
+        --accent-navy: #1a2340;
+        --accent-blue: #003087;
+        --accent-gold: #c8960c;
+        --accent-red: #c0392b;
+        --accent-green: #1a7a4a;
+        --text-primary: #0f1923;
+        --text-secondary: #4a5568;
+        --text-muted: #8a95a3;
+        --text-sidebar: #b8c4d8;
+        --text-sidebar-label: #7a8ba8;
+        --border-light: #e2e6ed;
+        --border-medium: #c8cfd9;
+        --shadow-card: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+        --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
+        --font-display: 'Playfair Display', Georgia, serif;
+        --font-body: 'Source Sans 3', 'Helvetica Neue', sans-serif;
+        --font-mono: 'Source Code Pro', 'Courier New', monospace;
+    }
+
+    /* ── Reset & Base ── */
     .stApp {
-        background-color: #0a0a0a;
-        color: #00ff00;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: var(--font-body);
     }
-    .stApp header, .stApp footer {
-        background-color: #111;
+    .stApp header {
+        background-color: var(--bg-secondary) !important;
+        border-bottom: 2px solid var(--accent-navy);
     }
-    .css-1d391kg, .css-1wrcr25 {
-        background-color: #111 !important;
+
+    /* ── Sidebar ── */
+    [data-testid="stSidebar"] {
+        background-color: var(--bg-sidebar) !important;
+        border-right: none;
     }
-    h1, h2, h3, h4, h5, h6 {
-        color: #00ff00 !important;
-        font-family: 'Courier New', monospace;
+    [data-testid="stSidebar"] > div {
+        padding-top: 0 !important;
     }
+    [data-testid="stSidebar"] * {
+        font-family: var(--font-body) !important;
+        color: var(--text-sidebar) !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown h2 {
+        font-family: var(--font-body) !important;
+        font-weight: 600 !important;
+        font-size: 0.65rem !important;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-sidebar-label) !important;
+        margin: 1.2rem 0 0.4rem 0;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    [data-testid="stSidebar"] label {
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        color: var(--text-sidebar-label) !important;
+    }
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stSelectbox select,
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] {
+        background-color: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #e0e7f0 !important;
+        border-radius: 3px !important;
+        font-size: 0.8rem !important;
+    }
+    [data-testid="stSidebar"] .stSlider label {
+        font-size: 0.75rem !important;
+    }
+
+    /* Sidebar title block */
+    [data-testid="stSidebar"] h1 {
+        font-family: var(--font-display) !important;
+        font-size: 1.1rem !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.01em;
+        padding: 1.4rem 0 0.2rem 0;
+        border-bottom: 2px solid var(--accent-gold);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Sidebar button */
+    [data-testid="stSidebar"] .stButton button {
+        background-color: var(--accent-blue) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 3px !important;
+        font-family: var(--font-body) !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.55rem 1rem !important;
+        transition: background-color 0.2s;
+    }
+    [data-testid="stSidebar"] .stButton button:hover {
+        background-color: #004bb5 !important;
+    }
+
+    /* ── Main Headings ── */
+    h1 {
+        font-family: var(--font-display) !important;
+        font-weight: 700 !important;
+        font-size: 2rem !important;
+        color: var(--accent-navy) !important;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+    h2 {
+        font-family: var(--font-body) !important;
+        font-weight: 600 !important;
+        font-size: 0.65rem !important;
+        color: var(--text-muted) !important;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-top: 1.8rem;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+    h3 {
+        font-family: var(--font-display) !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        color: var(--accent-navy) !important;
+    }
+    h4 {
+        font-family: var(--font-body) !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    /* ── Subtitle / tagline ── */
+    .report-tagline {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        margin-top: -0.6rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .report-tagline .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--accent-gold);
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* ── Section divider ── */
+    hr {
+        border: none;
+        border-top: 1px solid var(--border-light);
+        margin: 1.5rem 0;
+    }
+
+    /* ── Metrics ── */
+    [data-testid="stMetric"] {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-light);
+        border-top: 3px solid var(--accent-navy);
+        border-radius: 3px;
+        padding: 1rem 1.1rem;
+        box-shadow: var(--shadow-card);
+        transition: box-shadow 0.2s;
+    }
+    [data-testid="stMetric"]:hover {
+        box-shadow: var(--shadow-hover);
+    }
+    [data-testid="stMetricLabel"] {
+        font-family: var(--font-body) !important;
+        font-size: 0.68rem !important;
+        font-weight: 600 !important;
+        color: var(--text-muted) !important;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+    [data-testid="stMetricValue"] {
+        font-family: var(--font-mono) !important;
+        font-size: 1.35rem !important;
+        font-weight: 500 !important;
+        color: var(--accent-navy) !important;
+        line-height: 1.2;
+    }
+    [data-testid="stMetricDelta"] {
+        font-family: var(--font-mono) !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+    }
+
+    /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 2px;
-        background-color: #111;
+        background-color: var(--bg-secondary);
+        border-bottom: 2px solid var(--border-light);
+        gap: 0;
+        padding: 0;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #222;
-        border-radius: 4px 4px 0 0;
-        color: #0f0;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
+        background-color: transparent;
+        color: var(--text-muted);
+        font-family: var(--font-body) !important;
+        font-size: 0.78rem !important;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-bottom: 2px solid transparent;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0;
+        margin-bottom: -2px;
+        transition: color 0.15s;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: var(--accent-navy);
+        background-color: rgba(0, 0, 0, 0.02);
     }
     .stTabs [aria-selected="true"] {
-        background-color: #0a0a0a;
-        border-bottom: 2px solid #00ff00;
+        color: var(--accent-navy) !important;
+        border-bottom: 2px solid var(--accent-navy) !important;
+        background-color: transparent !important;
+        font-weight: 600 !important;
     }
+
+    /* ── DataFrames / Tables ── */
     .stDataFrame {
-        font-family: 'Courier New', monospace;
-        background-color: #111;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 3px !important;
+        box-shadow: var(--shadow-card);
+        font-family: var(--font-mono) !important;
+        font-size: 0.8rem !important;
     }
-    .stDataFrame td {
-        color: #0f0;
+    .stDataFrame thead tr th {
+        background-color: var(--accent-navy) !important;
+        color: #ffffff !important;
+        font-family: var(--font-body) !important;
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.6rem 0.8rem !important;
     }
-    .stDataFrame th {
-        background-color: #222;
-        color: #0f0;
-        font-weight: bold;
+    .stDataFrame tbody tr:nth-child(even) {
+        background-color: #f5f7fb !important;
     }
-    .stMetric {
-        background-color: #111;
-        border: 1px solid #0f0;
-        border-radius: 5px;
-        padding: 10px;
-        font-family: 'Courier New', monospace;
+    .stDataFrame tbody tr:hover {
+        background-color: #eef1f8 !important;
     }
-    .stMetric label {
-        color: #0f0 !important;
+    .stDataFrame tbody tr td {
+        color: var(--text-primary) !important;
+        padding: 0.5rem 0.8rem !important;
+        border-bottom: 1px solid var(--border-light) !important;
     }
-    .stMetric .value {
-        color: #0f0 !important;
-    }
-    .stAlert {
-        background-color: #111 !important;
-        color: #0f0 !important;
-        border: 1px solid #0f0;
-    }
+
+    /* ── Buttons (main) ── */
     .stButton button {
-        background-color: #111;
-        color: #0f0;
-        border: 1px solid #0f0;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
+        background-color: var(--bg-secondary);
+        color: var(--accent-navy);
+        border: 1.5px solid var(--border-medium);
+        border-radius: 3px;
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        transition: all 0.2s;
     }
     .stButton button:hover {
-        background-color: #0f0;
-        color: #111;
+        background-color: var(--accent-navy);
+        color: #ffffff;
+        border-color: var(--accent-navy);
     }
-    .sidebar .sidebar-content {
-        background-color: #111;
-        color: #0f0;
-        font-family: 'Courier New', monospace;
+    /* Primary button */
+    .stButton button[kind="primary"] {
+        background-color: var(--accent-navy) !important;
+        color: #ffffff !important;
+        border: none !important;
     }
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+    .stButton button[kind="primary"]:hover {
+        background-color: var(--accent-blue) !important;
     }
-    ::-webkit-scrollbar-track {
-        background: #111;
+
+    /* ── Alerts / Info boxes ── */
+    .stAlert {
+        border-radius: 3px !important;
+        border-left: 4px solid var(--accent-navy) !important;
+        background-color: #f0f3f9 !important;
+        font-family: var(--font-body) !important;
+        font-size: 0.82rem !important;
     }
-    ::-webkit-scrollbar-thumb {
-        background: #0f0;
-        border-radius: 4px;
+    .stAlert p {
+        color: var(--text-secondary) !important;
     }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #0c0;
+
+    /* ── Success / Warning / Error ── */
+    [data-testid="stNotification"][data-type="success"] {
+        border-left-color: var(--accent-green) !important;
+        background-color: #f0faf5 !important;
     }
+    [data-testid="stNotification"][data-type="warning"] {
+        border-left-color: var(--accent-gold) !important;
+        background-color: #fdf8ee !important;
+    }
+    [data-testid="stNotification"][data-type="error"] {
+        border-left-color: var(--accent-red) !important;
+        background-color: #fdf0ef !important;
+    }
+
+    /* ── Status widget ── */
+    [data-testid="stStatusWidget"] {
+        background-color: var(--bg-secondary) !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 3px !important;
+        font-family: var(--font-body) !important;
+    }
+
+    /* ── Container with border ── */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border: 1px solid var(--border-light) !important;
+        border-radius: 3px !important;
+        background-color: var(--bg-secondary) !important;
+        box-shadow: var(--shadow-card);
+        padding: 1.2rem !important;
+    }
+
+    /* ── Download button ── */
+    .stDownloadButton button {
+        background-color: transparent !important;
+        color: var(--accent-blue) !important;
+        border: 1.5px solid var(--accent-blue) !important;
+        font-size: 0.76rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .stDownloadButton button:hover {
+        background-color: var(--accent-blue) !important;
+        color: #ffffff !important;
+    }
+
+    /* ── Selectbox ── */
+    .stSelectbox [data-baseweb="select"] {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 3px !important;
+        font-family: var(--font-body) !important;
+        font-size: 0.82rem !important;
+    }
+
+    /* ── Text inputs ── */
+    .stTextInput input {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 3px !important;
+        font-family: var(--font-body) !important;
+        color: var(--text-primary) !important;
+    }
+
+    /* ── Spinner ── */
+    .stSpinner > div {
+        border-top-color: var(--accent-navy) !important;
+    }
+
+    /* ── Caption / small text ── */
+    .stCaption, caption {
+        font-family: var(--font-body) !important;
+        font-size: 0.72rem !important;
+        color: var(--text-muted) !important;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f0f2f5; }
+    ::-webkit-scrollbar-thumb { background: #c0c8d4; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a0aab8; }
+
+    /* ── AI Briefing markdown output ── */
+    .briefing-container {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-light);
+        border-top: 3px solid var(--accent-navy);
+        border-radius: 3px;
+        padding: 2rem 2.4rem;
+        box-shadow: var(--shadow-card);
+        line-height: 1.7;
+    }
+    .briefing-container h3 {
+        font-family: var(--font-display) !important;
+        font-size: 1.3rem !important;
+        color: var(--accent-navy) !important;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 0.6rem;
+        margin-bottom: 1.2rem;
+    }
+    .briefing-container p {
+        font-family: var(--font-body);
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.8rem;
+    }
+    .briefing-container ul li {
+        font-size: 0.87rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.3rem;
+    }
+    .briefing-container strong {
+        color: var(--accent-navy);
+    }
+    .briefing-container table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.82rem;
+        margin: 1rem 0;
+    }
+    .briefing-container table th {
+        background-color: var(--accent-navy);
+        color: white;
+        padding: 0.5rem 0.8rem;
+        text-align: left;
+    }
+    .briefing-container table td {
+        padding: 0.45rem 0.8rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .briefing-container table tr:nth-child(even) td {
+        background-color: #f5f7fb;
+    }
+
+    /* ── Header bar ── */
+    .page-header {
+        background-color: var(--accent-navy);
+        margin: -1rem -1rem 1.5rem -1rem;
+        padding: 1.2rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* ── Preview placeholder cards ── */
+    .placeholder-card {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-light);
+        border-top: 3px solid #e2e6ed;
+        border-radius: 3px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    /* ── Multiselect tags ── */
+    [data-baseweb="tag"] {
+        background-color: var(--accent-navy) !important;
+        border-radius: 2px !important;
+    }
+    [data-baseweb="tag"] span {
+        color: #ffffff !important;
+        font-family: var(--font-body) !important;
+        font-size: 0.72rem !important;
+    }
+
+    /* ── Status badge ── */
+    .status-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 2px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .badge-live {
+        background-color: #e8f5f0;
+        color: var(--accent-green);
+        border: 1px solid #c0e0d0;
+    }
+    .badge-pending {
+        background-color: #fdf8ee;
+        color: #a07000;
+        border: 1px solid #edd090;
+    }
+
 </style>
 """, unsafe_allow_html=True)
+
 
 # ==========================================
 # 3. SOURCE REGISTRY (90+ FREE SOURCES)
@@ -224,8 +628,9 @@ ALL_SOURCES = [
     {"name": "NOAA Climate Data", "type": "api", "url": "https://www.ncdc.noaa.gov/cdo-web/api/v2/data", "category": "Geopolitical"},
 ]
 
+
 # ==========================================
-# 4. DATA SOURCE MANAGER
+# 4. DATA SOURCE MANAGER  (unchanged)
 # ==========================================
 class DataSourceManager:
     def __init__(self, sources: List[Dict]):
@@ -286,7 +691,7 @@ class DataSourceManager:
         if not api_key:
             return {"error": "FRED_API_KEY not set"}
         series = source["series_id"]
-        url = f"https://api.stlouisfed.org/fred/series/observations"
+        url = "https://api.stlouisfed.org/fred/series/observations"
         params = {
             "series_id": series,
             "api_key": api_key,
@@ -323,7 +728,6 @@ class DataSourceManager:
     def fetch_selected(self, selected_names: List[str], max_workers=10) -> Dict[str, Dict]:
         results = {}
         sources_to_fetch = [s for s in self.sources if s["name"] in selected_names]
-        
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_name = {
                 executor.submit(self.fetch_source, src): src["name"]
@@ -339,13 +743,11 @@ class DataSourceManager:
                     results[name] = {"error": f"Fetch timeout/error: {str(e)}"}
         return results
 
+
 # ==========================================
-# 5. EXPANDED AI PROMPTS FUNCTION
+# 5. AI ANALYSIS FUNCTION  (unchanged)
 # ==========================================
 def analyze_with_deepseek(prompt_type: str, market_context: str, news_context: str, api_key: str) -> str:
-    """
-    Generate a strategic briefing using DeepSeek, with expanded prompts.
-    """
     system_prompt = (
         "You are an elite Macro-Risk Analyst with over 15 years of combined experience in "
         "geopolitics, energy logistics, supply chain management, and financial markets. "
@@ -379,99 +781,81 @@ You are advising an energy trading desk and a shipping logistics team. Based on 
 - **Downstream Logistics**: Refinery utilization, inventory levels (crude, products), and potential bottlenecks in pipeline or rail networks.
 - **Geopolitical Flashpoints**: Sanctions, conflicts, or political instability affecting energy supply chains. Focus on Russia-Ukraine, Middle East, and Venezuela/Iran.
 - **Actionable Insights**: For a VP of Energy Procurement, what hedging strategies, contract renegotiations, or alternative sourcing options should be considered for H2 2026?
-
-Structure your answer with clear headings and bullet points. Use data to support every claim.
 """,
         'regional': """
 **LATAM & Caribbean Geopolitical Risk Assessment – 2026**
 
 Focus on Trinidad & Tobago, the wider Caribbean, and key Latin American economies (Brazil, Mexico, Argentina, Venezuela, Colombia). Your analysis must address:
 
-- **Political Stability & Governance**: Recent elections, protests, or policy shifts that could impact business operations. Include corruption perceptions, rule of law trends, and social unrest risks.
-- **Economic Vulnerability**: Currency volatility, inflation, debt levels, and reliance on commodity exports (oil, gas, minerals, agriculture). Highlight any IMF programs or default risks.
-- **Shipping & Trade Chokepoints**: Assess risks to maritime routes (Panama Canal, Caribbean passages, Amazon River ports). Piracy, port strikes, or infrastructure bottlenecks.
-- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness). How do local dynamics affect global supply?
-- **Social & Environmental Factors**: Climate change impacts (hurricanes, droughts), migration flows, and their effect on labor markets and social cohesion.
-- **Risk Scenarios**: Develop two plausible scenarios for the region over the next 12 months (e.g., "Venezuela opens to foreign oil investment" vs. "Regional debt crisis") and their implications for multinational firms.
-- **Recommendations**: For a regional operations director, what contingency plans, diversification strategies, or partnerships should be prioritized?
-
-Use a structured format with numbered sections and bullet points. Reference specific countries and data points.
+- **Political Stability & Governance**: Recent elections, protests, or policy shifts that could impact business operations.
+- **Economic Vulnerability**: Currency volatility, inflation, debt levels, and reliance on commodity exports.
+- **Shipping & Trade Chokepoints**: Assess risks to maritime routes (Panama Canal, Caribbean passages, Amazon River ports).
+- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness).
+- **Social & Environmental Factors**: Climate change impacts (hurricanes, droughts), migration flows.
+- **Risk Scenarios**: Develop two plausible scenarios for the region over the next 12 months and their implications.
+- **Recommendations**: Contingency plans, diversification strategies, or partnerships to prioritize.
 """,
         'tech': """
 **Technology & Digitalization Macro Trends – 2026**
 
-You are advising the CIO of a global logistics firm. Analyze how the provided data signals shifts in tech adoption, automation, and IT services. Address:
+You are advising the CIO of a global logistics firm. Address:
 
-- **Automation & AI in Operations**: How are rising labor costs, supply chain volatility, or energy prices accelerating adoption of robotics and AI in warehouses, ports, and field operations? Cite any relevant news (e.g., new factory openings, labor disputes, tech investments).
-- **IT Services & Cloud Demand**: Impact of geopolitical tensions (e.g., US-China tech war) on cloud infrastructure, data sovereignty, and IT outsourcing. Are there signs of regionalization of tech services?
-- **Cybersecurity Risk Landscape**: Increased attacks on critical infrastructure (energy, logistics) – correlate with news events. What vulnerabilities do current macro trends create?
-- **Digitalization of Supply Chains**: Adoption of blockchain for traceability, IoT for asset tracking, and digital twins. How are commodity price swings or trade policy changes influencing investment in these technologies?
-- **Talent & Workforce**: Remote work trends, tech talent migration, and implications for hiring and retention in IT departments.
-- **Strategic Recommendations**: For a global technology officer, what technology investments should be prioritized, delayed, or reconsidered in light of 2026's macro environment? Include specific areas (cybersecurity, AI, cloud).
-
-Be specific and data-driven. Use examples from the news feeds where applicable.
+- **Automation & AI in Operations**: Adoption of robotics and AI in warehouses, ports, and field operations.
+- **IT Services & Cloud Demand**: Impact of geopolitical tensions on cloud infrastructure and IT outsourcing.
+- **Cybersecurity Risk Landscape**: Increased attacks on critical infrastructure.
+- **Digitalization of Supply Chains**: Blockchain, IoT, digital twins adoption.
+- **Talent & Workforce**: Remote work trends, tech talent migration.
+- **Strategic Recommendations**: Technology investments to prioritize, delay, or reconsider in 2026.
 """,
         'warehouse': """
 **Warehouse & Inventory Operations Manager Briefing – 2026**
 
-You are speaking directly to a senior warehouse and inventory manager. Translate the macro data into operational impacts and recommendations:
+Translate the macro data into operational impacts and recommendations:
 
-- **Procurement Lead Times**: Based on commodity price trends (metals, lumber, packaging) and news of supply disruptions, estimate changes in lead times for key inputs. Provide a table if possible:
-  | Material | Current Trend | Expected Lead Time Impact |
-  |----------|---------------|----------------------------|
-  | Steel    | +5% price     | +2 weeks due to mill backlogs |
-- **Inventory Holding Costs**: Rising interest rates (from economic data) increase carrying costs. Calculate the impact on cost of capital for inventory. Suggest optimal inventory levels (just-in-case vs. just-in-time).
-- **Facility Resource Allocation**: Energy price volatility affects utility costs. Should the warehouse shift schedules to off-peak hours? Invest in solar? How do labor market trends (unemployment, wage pressures) affect staffing?
-- **Transportation & Inbound Logistics**: Fuel surcharges, trucking availability, and port delays – correlate with news. Advise on carrier diversification or mode shifts (e.g., rail vs. truck).
-- **Risk Mitigation**: Develop a contingency plan for a major disruption (e.g., port strike, energy blackout). What safety stock levels are prudent?
+- **Procurement Lead Times**: Based on commodity price trends and supply disruptions.
+- **Inventory Holding Costs**: Rising interest rates increasing carrying costs.
+- **Facility Resource Allocation**: Energy price volatility affecting utility costs and staffing.
+- **Transportation & Inbound Logistics**: Fuel surcharges, trucking availability, port delays.
+- **Risk Mitigation**: Contingency plan for a major disruption (port strike, energy blackout).
 - **Action Items**: A checklist of 5 immediate actions for the next quarter.
-
-Use practical language and quantify impacts wherever possible.
 """,
         'pm_risk': """
 **Senior Project Manager Risk Assessment – 2026**
 
-You are managing large-scale infrastructure or industrial projects (e.g., refinery expansion, port development, mining operation). Analyze the data to identify and mitigate risks:
+For large-scale infrastructure or industrial projects, analyze:
 
-- **Scope Creep Risks**: How might geopolitical events (sanctions, new regulations) or commodity price swings force design changes? Provide examples.
-- **Schedule Risks**: Supply chain delays for critical equipment (e.g., turbines, steel, semiconductors). Use news and price data to estimate potential delays. Create a simple risk matrix (Likelihood vs. Impact).
-- **Cost Escalation**: Inflation in raw materials, labor, and energy. Quantify potential overruns. What contingency percentage is advisable?
-- **Labor & Workforce**: Strikes, skilled labor shortages, or immigration policy changes affecting project staffing.
-- **Financing & Currency**: Interest rate hikes (from economic data) increasing cost of capital. Currency volatility impacting imported equipment costs.
-- **Mitigation Strategies**: For each top risk, propose concrete mitigation (e.g., advance procurement, dual sourcing, fixed-price contracts, modular construction).
-- **Monitoring Recommendations**: Key indicators (KPIs) to track weekly to stay ahead of risks.
-
-Structure your response as a formal risk assessment report with sections, tables, and clear bullet points.
+- **Scope Creep Risks**: Geopolitical events or commodity price swings forcing design changes.
+- **Schedule Risks**: Supply chain delays for critical equipment.
+- **Cost Escalation**: Inflation in raw materials, labor, and energy.
+- **Labor & Workforce**: Strikes, skilled labor shortages.
+- **Financing & Currency**: Interest rate and currency volatility impacts.
+- **Mitigation Strategies**: Concrete mitigation for each top risk.
+- **Monitoring Recommendations**: KPIs to track weekly.
 """,
         'crypto': """
 **Digital Assets & Crypto Market Analysis – 2026**
 
-You are advising a crypto hedge fund. Analyze how traditional macro factors and news events are influencing digital assets:
+Advising a crypto hedge fund:
 
-- **Macro Drivers**: Correlation of Bitcoin/Ethereum with equities, commodities (especially gold), and the US dollar. How do interest rate expectations (from economic data) affect crypto as a risk asset or inflation hedge?
-- **Regulatory News**: Track any mentions of crypto regulation in news feeds (SEC, EU MiCA, China bans). Assess potential market impact.
-- **Institutional Adoption**: News of major companies adding crypto to balance sheets, banks offering custody, or ETF flows.
-- **On-Chain & Sentiment Indicators**: While not directly in data, infer from price action and news sentiment (e.g., "fear" vs. "greed").
-- **Energy & Mining**: Impact of energy prices on Bitcoin mining profitability and hash rate. Any news on mining migration?
-- **Geopolitical Risk**: Use of crypto for sanctions evasion, capital flight from unstable regions. How do conflicts affect demand?
-- **Outlook & Positioning**: Based on the above, provide a tactical outlook for the next 3–6 months. Recommend portfolio positioning (e.g., overweight Bitcoin, underweight altcoins, hedge with options).
-
-Be analytical and data-backed. Avoid hype.
+- **Macro Drivers**: Correlation of Bitcoin/Ethereum with equities, commodities, and the US dollar.
+- **Regulatory News**: Crypto regulation mentions in news feeds and market impact.
+- **Institutional Adoption**: Major companies adding crypto to balance sheets, ETF flows.
+- **Energy & Mining**: Impact of energy prices on Bitcoin mining profitability.
+- **Geopolitical Risk**: Use of crypto for sanctions evasion, capital flight.
+- **Outlook & Positioning**: Tactical outlook for the next 3–6 months.
 """,
         'power_structures': """
 **Advanced Geopolitical Power Structures Analysis – 2026**
 
-You are a geopolitical strategist advising a sovereign wealth fund. Analyze the data through the lens of shifting global power dynamics:
+Advising a sovereign wealth fund:
 
-- **US-China Rivalry**: How do current events (trade wars, tech bans, military exercises) indicate escalation or de-escalation? Impact on global supply chains, technology decoupling, and financial systems.
-- **Regional Power Shifts**: Rise of new blocs (BRICS+, SCO). Any news of currency de-dollarization, new trade pacts, or military alliances?
-- **Energy as a Weapon**: How are energy-exporting nations (Russia, Saudi, Iran) using supply to exert influence? What does that mean for Europe, Asia, and energy security?
-- **Economic Warfare**: Sanctions, export controls, and asset freezes. Analyze effectiveness and blowback. Are there signs of weaponized interdependence?
-- **Systemic Control**: How are digital currencies, surveillance tech, and data localization reshaping state control over economies?
-- **Fragile States & Proxy Conflicts**: Identify regions where state failure or proxy wars could disrupt global markets (e.g., Sahel, Horn of Africa, Myanmar).
-- **Implications for Investors**: What sectors, regions, or asset classes are most exposed? Should portfolios tilt toward hard assets, defense, or commodities?
-
-Provide a deep, nuanced analysis with historical context and forward-looking scenarios. Use structured sections and bullet points.
+- **US-China Rivalry**: Escalation or de-escalation signals and supply chain impact.
+- **Regional Power Shifts**: Rise of BRICS+, SCO, currency de-dollarization.
+- **Energy as a Weapon**: How energy-exporting nations exert influence.
+- **Economic Warfare**: Sanctions, export controls, weaponized interdependence.
+- **Systemic Control**: Digital currencies, surveillance tech, data localization.
+- **Fragile States & Proxy Conflicts**: Regions where state failure could disrupt markets.
+- **Implications for Investors**: Sectors, regions, or asset classes most exposed.
 """
     }
 
@@ -500,62 +884,37 @@ Latest Intelligence (News):
     except Exception as e:
         return f"**Analysis failed:** {e}"
 
+
 # ==========================================
-# 6. HELPER: Format results for display
+# 6. HELPER: Format results for display  (unchanged)
 # ==========================================
 def format_results_for_category(results: Dict, category: str) -> pd.DataFrame:
-    """Return a DataFrame with columns: Source, Value, Change, Status"""
     rows = []
     for src_name, data in results.items():
         src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
         if src and src["category"] == category:
             if "error" in data:
-                rows.append({
-                    "Source": src_name,
-                    "Value": "ERROR",
-                    "Change": "",
-                    "Status": "❌"
-                })
+                rows.append({"Source": src_name, "Value": "Error", "Change": "—", "Status": "Error"})
             elif "price" in data:
                 rows.append({
                     "Source": src_name,
                     "Value": f"${data['price']:,.2f}",
                     "Change": f"{data.get('change', 0):+.2f}",
-                    "Status": "✓"
+                    "Status": "Live"
                 })
             elif "headlines" in data:
-                # For news, show headline count
-                rows.append({
-                    "Source": src_name,
-                    "Value": f"{len(data['headlines'])} headlines",
-                    "Change": "",
-                    "Status": "📰"
-                })
+                rows.append({"Source": src_name, "Value": f"{len(data['headlines'])} headlines", "Change": "—", "Status": "Live"})
             elif "value" in data:
-                rows.append({
-                    "Source": src_name,
-                    "Value": data['value'],
-                    "Change": "",
-                    "Status": "📊"
-                })
+                rows.append({"Source": src_name, "Value": data['value'], "Change": "—", "Status": "Live"})
             elif "data" in data:
-                rows.append({
-                    "Source": src_name,
-                    "Value": "API data",
-                    "Change": "",
-                    "Status": "📡"
-                })
+                rows.append({"Source": src_name, "Value": "API data received", "Change": "—", "Status": "Live"})
             else:
-                rows.append({
-                    "Source": src_name,
-                    "Value": "Received",
-                    "Change": "",
-                    "Status": "✓"
-                })
+                rows.append({"Source": src_name, "Value": "Received", "Change": "—", "Status": "Live"})
     return pd.DataFrame(rows)
 
+
 # ==========================================
-# 7. INITIALISE SESSION STATE
+# 7. SESSION STATE
 # ==========================================
 if "data_manager" not in st.session_state:
     st.session_state.data_manager = DataSourceManager(ALL_SOURCES)
@@ -566,14 +925,31 @@ if "analysis_in_progress" not in st.session_state:
 if "last_fetch_time" not in st.session_state:
     st.session_state.last_fetch_time = None
 
+
 # ==========================================
-# 8. SIDEBAR CONFIGURATION
+# 8. SIDEBAR
 # ==========================================
 with st.sidebar:
-    st.title("⚙️ CONFIG")
-    
-    # API Key input (DeepSeek)
-    api_key = st.text_input("DeepSeek API Key", type="password")
+    # Firm-style header
+    st.markdown("""
+    <div style="background:#1a2340; margin:-1rem -1rem 0 -1rem; padding:1.4rem 1.2rem 1rem 1.2rem; border-bottom:2px solid #c8960c;">
+        <div style="font-family:'Source Sans 3',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:#7a8ba8; margin-bottom:0.3rem;">
+            INTELLIGENCE PLATFORM
+        </div>
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:1.1rem; font-weight:700; color:#ffffff; line-height:1.2;">
+            Macro-Risk Hub
+        </div>
+        <div style="font-size:0.68rem; color:#7a8ba8; margin-top:0.3rem; font-family:'Source Sans 3',sans-serif;">
+            2026 Edition
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # API Key
+    st.markdown("## API Configuration")
+    api_key = st.text_input("DeepSeek API Key", type="password", placeholder="sk-...")
     if not api_key:
         api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
@@ -581,57 +957,85 @@ with st.sidebar:
             api_key = st.secrets["DEEPSEEK_API_KEY"]
         except:
             pass
-    
+
     if api_key:
-        st.success("✅ Key set")
+        st.success("API key configured")
     else:
-        st.warning("⚠️ Key missing")
-    
+        st.warning("API key required for AI analysis")
+
     st.markdown("---")
-    
-    # Source selection
-    st.subheader("📡 SOURCES")
+
+    # Data Sources
+    st.markdown("## Data Sources")
     categories = list(set(s["category"] for s in ALL_SOURCES))
-    selected_category = st.selectbox("Filter", ["All"] + sorted(categories))
-    
+    selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
+
     filtered_sources = ALL_SOURCES
     if selected_category != "All":
         filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
-    
+
     source_names = [s["name"] for s in filtered_sources]
     selected_sources = st.multiselect(
-        "Select sources",
+        "Active sources",
         options=source_names,
         default=source_names[:10]
     )
-    
-    update_freq = st.slider("Cache (s)", 300, 7200, 3600, step=300)
-    
-    if st.button("🔄 FETCH", use_container_width=True):
-        with st.spinner(f"Fetching {len(selected_sources)} sources..."):
+
+    st.markdown("## Refresh Settings")
+    update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    fetch_clicked = st.button("Fetch Selected Sources", use_container_width=True, type="primary")
+    if fetch_clicked:
+        with st.spinner(f"Retrieving data from {len(selected_sources)} sources…"):
             results = st.session_state.data_manager.fetch_selected(selected_sources)
             st.session_state.fetched_results = results
             st.session_state.last_fetch_time = time.time()
             success_count = sum(1 for v in results.values() if "error" not in v)
-            st.success(f"Fetched {success_count}/{len(selected_sources)}")
-    
+            st.success(f"{success_count} of {len(selected_sources)} sources retrieved")
+
     if st.session_state.last_fetch_time:
-        st.caption(f"Last: {time.strftime('%H:%M:%S', time.localtime(st.session_state.last_fetch_time))}")
-    
+        st.caption(f"Last updated: {time.strftime('%H:%M:%S', time.localtime(st.session_state.last_fetch_time))}")
+
     st.markdown("---")
-    st.caption("© 2026 Macro-Risk Terminal")
+    st.markdown("""
+    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.65rem; color:#4a5a70; line-height:1.6; padding-bottom:0.5rem;">
+        © 2026 Macro-Risk Intelligence Hub<br>
+        All data sourced from public APIs.<br>
+        For informational purposes only.
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # ==========================================
 # 9. MAIN DASHBOARD
 # ==========================================
-st.title("🌍 MACRO-RISK INTELLIGENCE TERMINAL")
-st.markdown("#### Real‑time monitoring • 2026")
+
+# ── Page header ──
+st.markdown("""
+<div style="border-bottom:2px solid #1a2340; padding-bottom:1rem; margin-bottom:1.5rem;">
+    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.62rem; font-weight:600;
+                letter-spacing:0.2em; text-transform:uppercase; color:#8a95a3; margin-bottom:0.4rem;">
+        Global Intelligence Report
+    </div>
+    <h1 style="margin:0 0 0.3rem 0; font-family:'Playfair Display',Georgia,serif;
+               font-size:2rem; font-weight:700; color:#1a2340;">
+        Macro-Risk Intelligence Hub
+    </h1>
+    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.85rem; color:#8a95a3;">
+        Real-time monitoring &nbsp;·&nbsp; Multi-source aggregation &nbsp;·&nbsp; AI-powered analysis &nbsp;·&nbsp; 2026
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 
 if st.session_state.fetched_results:
     results = st.session_state.fetched_results
 
-    # ===== KEY METRICS ROW =====
-    st.subheader("📊 SPOT PRICES")
+    # ── Spot Prices ──
+    st.markdown("## Market Snapshot")
+
     price_sources = [(name, data) for name, data in results.items()
                      if isinstance(data, dict) and "price" in data]
     if price_sources:
@@ -645,43 +1049,92 @@ if st.session_state.fetched_results:
                     delta_color="normal"
                 )
     else:
-        st.info("No price data yet.")
+        st.info("No price data available. Select sources and fetch data.")
 
     st.divider()
 
-    # ===== CATEGORY TABS =====
-    st.subheader("📂 DETAILED DATA")
-    tab_names = ["Energy", "Metals", "Agriculture", "Economic", "Monetary", "Currency", "Equities", "Crypto", "News", "Geopolitical"]
-    tabs = st.tabs([f"⚡{n}" if n=="Energy" else f"📈{n}" for n in tab_names])  # add icons
+    # ── Category Tabs ──
+    st.markdown("## Data by Category")
 
-    for tab, category in zip(tabs, tab_names):
+    tab_labels = ["Energy", "Metals", "Agriculture", "Economic", "Monetary",
+                  "Currency", "Equities", "Crypto", "News", "Geopolitical"]
+    tabs = st.tabs(tab_labels)
+
+    for tab, category in zip(tabs, tab_labels):
         with tab:
             df = format_results_for_category(results, category)
             if not df.empty:
-                # Style the DataFrame
-                styled_df = df.style.applymap(
-                    lambda x: 'color: #0f0' if isinstance(x, str) and x.startswith('$') else '',
-                    subset=['Value']
-                ).applymap(
-                    lambda x: 'color: #0f0' if isinstance(x, str) and x.startswith('+') else ('color: #f00' if isinstance(x, str) and x.startswith('-') else ''),
-                    subset=['Change']
+                # Colour the Change and Status columns
+                def style_change(val):
+                    if isinstance(val, str) and val.startswith('+'):
+                        return 'color: #1a7a4a; font-weight:600'
+                    elif isinstance(val, str) and val.startswith('-'):
+                        return 'color: #c0392b; font-weight:600'
+                    return ''
+
+                def style_status(val):
+                    if val == "Error":
+                        return 'color: #c0392b'
+                    elif val == "Live":
+                        return 'color: #1a7a4a; font-weight:500'
+                    return 'color: #8a95a3'
+
+                styled_df = (
+                    df.style
+                    .applymap(style_change, subset=['Change'])
+                    .applymap(style_status, subset=['Status'])
                 )
                 st.dataframe(styled_df, use_container_width=True, height=300)
+
+                # News headlines expanded view
+                if category == "News":
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.markdown("#### Recent Headlines")
+                    for src_name, data in results.items():
+                        src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
+                        if src and src["category"] == "News" and "headlines" in data:
+                            with st.expander(f"**{src_name}**", expanded=False):
+                                for hl in data["headlines"]:
+                                    st.markdown(
+                                        f"<div style='font-size:0.83rem; padding:0.4rem 0; "
+                                        f"border-bottom:1px solid #e2e6ed; font-family:\"Source Sans 3\",sans-serif;'>"
+                                        f"<a href='{hl['link']}' target='_blank' "
+                                        f"style='color:#003087; text-decoration:none; font-weight:500;'>"
+                                        f"{hl['title']}</a>"
+                                        f"<span style='color:#8a95a3; font-size:0.72rem; margin-left:0.8rem;'>"
+                                        f"{hl['published']}</span></div>",
+                                        unsafe_allow_html=True
+                                    )
             else:
-                st.caption("No data in this category. Select sources in sidebar and fetch.")
+                st.markdown(
+                    "<div style='color:#8a95a3; font-size:0.82rem; padding:1rem 0;'>"
+                    "No data available in this category. Select relevant sources in the sidebar and fetch."
+                    "</div>",
+                    unsafe_allow_html=True
+                )
 
-    # ===== AI ANALYSIS SECTION =====
+    # ── AI Analysis ──
     st.divider()
-    st.subheader("🧠 AI STRATEGIC ANALYSIS")
-    st.markdown("Select a lens and generate a forward-looking briefing based on **current 2026 data**.")
-
-    analysis_type = st.selectbox(
-        "Analysis lens:",
-        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
-         "Tech & Digitalization", "Warehouse Ops", "PM Risk",
-         "Crypto", "Geopolitical Power"],
-        key="analysis_selector"
+    st.markdown("## AI Strategic Analysis")
+    st.markdown(
+        "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.85rem; color:#4a5568; "
+        "margin-bottom:1rem;'>Select an analytical framework and generate a forward-looking "
+        "briefing grounded in the current data environment.</div>",
+        unsafe_allow_html=True
     )
+
+    col_sel, col_btn = st.columns([3, 1])
+    with col_sel:
+        analysis_type = st.selectbox(
+            "Analytical framework",
+            ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
+             "Tech & Digitalization", "Warehouse Ops", "PM Risk",
+             "Crypto", "Geopolitical Power"],
+            key="analysis_selector",
+            label_visibility="collapsed"
+        )
+    with col_btn:
+        generate_clicked = st.button("Generate Briefing", type="primary", use_container_width=True)
 
     prompt_map = {
         "General Macro": "general",
@@ -694,18 +1147,17 @@ if st.session_state.fetched_results:
         "Geopolitical Power": "power_structures"
     }
 
-    if st.button("🚀 GENERATE BRIEFING", type="primary", use_container_width=True):
+    if generate_clicked:
         if not api_key:
-            st.error("⚠️ DeepSeek API key required.")
+            st.error("A DeepSeek API key is required to generate analysis.")
         elif not st.session_state.fetched_results:
-            st.warning("Please fetch data first.")
+            st.warning("Please fetch data before generating a briefing.")
         else:
             st.session_state.analysis_in_progress = True
 
-            with st.status("🔄 Generating...", expanded=True) as status:
-                st.write("📊 Compiling market data...")
-                market_lines = []
-                news_lines = []
+            with st.status("Generating strategic briefing…", expanded=True) as status:
+                st.write("Compiling market data…")
+                market_lines, news_lines = [], []
                 for name, data in results.items():
                     if "error" in data:
                         continue
@@ -720,31 +1172,63 @@ if st.session_state.fetched_results:
                 market_context = "\n".join(market_lines[:25])
                 news_context = "\n".join(news_lines[:12])
 
-                st.write("🧠 Calling DeepSeek...")
-                report = analyze_with_deepseek(prompt_map[analysis_type], market_context, news_context, api_key)
-                status.update(label="✅ Briefing ready", state="complete")
+                st.write("Calling AI analysis engine…")
+                report = analyze_with_deepseek(
+                    prompt_map[analysis_type], market_context, news_context, api_key
+                )
+                status.update(label="Briefing complete", state="complete")
 
-            with st.container(border=True):
-                st.markdown("### Strategic Briefing for 2026")
-                st.markdown(report)
+            # Render the briefing in a styled container
+            st.markdown("""
+            <div style="background:#ffffff; border:1px solid #e2e6ed; border-top:3px solid #1a2340;
+                        border-radius:3px; padding:2rem 2.4rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                <div style="font-family:'Source Sans 3',sans-serif; font-size:0.6rem; font-weight:600;
+                            letter-spacing:0.18em; text-transform:uppercase; color:#8a95a3;
+                            margin-bottom:0.6rem;">Strategic Intelligence Report · 2026</div>
+            """, unsafe_allow_html=True)
+            st.markdown(report)
+            st.markdown("</div>", unsafe_allow_html=True)
 
+            st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
-                label="📥 Download (Markdown)",
+                label="Download Report (Markdown)",
                 data=report,
-                file_name=f"briefing_{int(time.time())}.md",
+                file_name=f"macro_risk_briefing_{int(time.time())}.md",
                 mime="text/markdown",
-                use_container_width=True
+                use_container_width=False
             )
-
             st.session_state.analysis_in_progress = False
 
 else:
-    st.info("👈 **Start:** Select sources in sidebar and click 'FETCH'.")
-    with st.container(border=True):
-        st.markdown("**TERMINAL PREVIEW**")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1: st.metric("Crude Oil", "$--.--", "--")
-        with col2: st.metric("Gold", "$--.--", "--")
-        with col3: st.metric("S&P 500", "--.--", "--")
-        with col4: st.metric("VIX", "--.--", "--")
-        st.caption("Awaiting data...")
+    # ── Empty state ──
+    st.markdown("""
+    <div style="background:#ffffff; border:1px solid #e2e6ed; border-radius:3px;
+                padding:2.5rem 2rem; text-align:center; margin-top:1rem;
+                box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+        <div style="font-size:2rem; margin-bottom:0.8rem;">📊</div>
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:1.2rem;
+                    font-weight:600; color:#1a2340; margin-bottom:0.5rem;">
+            No Data Loaded
+        </div>
+        <div style="font-family:'Source Sans 3',sans-serif; font-size:0.85rem; color:#8a95a3;
+                    max-width:380px; margin:0 auto; line-height:1.6;">
+            Select your data sources in the sidebar and click <strong>Fetch Selected Sources</strong>
+            to begin your analysis session.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("## Preview")
+    col1, col2, col3, col4 = st.columns(4)
+    placeholder_metrics = [
+        ("Crude Oil (WTI)", "—", "—"),
+        ("Gold", "—", "—"),
+        ("S&P 500", "—", "—"),
+        ("VIX", "—", "—"),
+    ]
+    for col, (label, val, delta) in zip([col1, col2, col3, col4], placeholder_metrics):
+        with col:
+            st.metric(label=label, value=val, delta=delta)
+
+    st.caption("Awaiting data fetch to populate dashboard.")
