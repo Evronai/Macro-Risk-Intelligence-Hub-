@@ -561,6 +561,181 @@ st.markdown("""
         letter-spacing: 0.08em;
         text-transform: uppercase;
     }
+    /* ══════════════════════════════════════
+       MOBILE RESPONSIVE STYLES
+       ══════════════════════════════════════ */
+
+    /* ── Fluid base on small screens ── */
+    @media (max-width: 768px) {
+
+        /* Tighter page padding */
+        .main .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            padding-top: 0.5rem !important;
+        }
+
+        /* Scale down page title */
+        h1 {
+            font-size: 1.3rem !important;
+            line-height: 1.25 !important;
+        }
+        h2 {
+            font-size: 0.6rem !important;
+            margin-top: 1.2rem !important;
+        }
+        h3 {
+            font-size: 0.95rem !important;
+        }
+
+        /* Page header banner — stack vertically */
+        .page-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            padding: 0.8rem 1rem !important;
+            gap: 0.3rem;
+        }
+
+        /* Section tint strips — reduce padding */
+        .section-market,
+        .section-data,
+        .section-ai {
+            padding: 0.4rem 0.7rem !important;
+            margin-bottom: 0.7rem !important;
+        }
+
+        /* Metric cards — smaller text on mobile */
+        [data-testid="stMetric"] {
+            padding: 0.7rem 0.8rem !important;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 1.05rem !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 0.6rem !important;
+        }
+        [data-testid="stMetricDelta"] {
+            font-size: 0.7rem !important;
+        }
+
+        /* Tabs — smaller, allow scroll */
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.65rem !important;
+            padding: 0.55rem 0.7rem !important;
+            white-space: nowrap !important;
+            letter-spacing: 0.02em !important;
+        }
+
+        /* Price cards — tighter on mobile */
+        div[style*="border-left:3px solid"] {
+            padding: 0.7rem 0.75rem !important;
+            margin-bottom: 0.6rem !important;
+        }
+
+        /* Tables — allow horizontal scroll */
+        .stDataFrame, table {
+            font-size: 0.72rem !important;
+            display: block !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .stDataFrame thead tr th {
+            font-size: 0.6rem !important;
+            padding: 0.4rem 0.5rem !important;
+        }
+        .stDataFrame tbody tr td {
+            padding: 0.35rem 0.5rem !important;
+        }
+
+        /* News feed — reduce padding */
+        div[style*="border-bottom:1px solid #e2e6ed"] {
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        /* Tab sub-header strip */
+        div[style*="border-left:3px solid"] {
+            font-size: 0.72rem !important;
+        }
+
+        /* Buttons — full width on mobile */
+        .stButton button {
+            font-size: 0.72rem !important;
+            padding: 0.5rem 0.6rem !important;
+        }
+
+        /* Selectbox / inputs */
+        .stSelectbox [data-baseweb="select"],
+        .stTextInput input {
+            font-size: 0.8rem !important;
+        }
+
+        /* Download button */
+        .stDownloadButton button {
+            font-size: 0.7rem !important;
+            width: 100% !important;
+        }
+
+        /* AI briefing output */
+        .briefing-container {
+            padding: 1.2rem 1rem !important;
+        }
+        .briefing-container h3 {
+            font-size: 1.05rem !important;
+        }
+        .briefing-container p,
+        .briefing-container ul li {
+            font-size: 0.82rem !important;
+        }
+
+        /* Inline HTML tables used in kv/geo sections */
+        table[style*="border-collapse:collapse"] {
+            font-size: 0.72rem !important;
+            display: block !important;
+            overflow-x: auto !important;
+        }
+        table[style*="border-collapse:collapse"] th,
+        table[style*="border-collapse:collapse"] td {
+            padding: 0.35rem 0.5rem !important;
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
+        /* Sidebar — already hidden by Streamlit on mobile,
+           but ensure no overflow when open */
+        [data-testid="stSidebar"] {
+            min-width: 260px !important;
+            max-width: 85vw !important;
+        }
+
+        /* Empty state card */
+        div[style*="text-align:center"][style*="padding:2.5rem"] {
+            padding: 1.5rem 1rem !important;
+        }
+    }
+
+    /* ── Extra small screens (≤480px) ── */
+    @media (max-width: 480px) {
+        h1 { font-size: 1.1rem !important; }
+
+        .main .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 0.95rem !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.58rem !important;
+            padding: 0.5rem 0.55rem !important;
+        }
+    }
 
 </style>
 """, unsafe_allow_html=True)
@@ -1588,17 +1763,19 @@ with st.sidebar:
 
 # ── Page header ──
 st.markdown("""
-<div style="border-bottom:2px solid #1a2340; padding-bottom:1rem; margin-bottom:1.5rem;">
-    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.62rem; font-weight:600;
-                letter-spacing:0.2em; text-transform:uppercase; color:#8a95a3; margin-bottom:0.4rem;">
+<div style="border-bottom:2px solid #1a2340; padding-bottom:0.8rem; margin-bottom:1.2rem;">
+    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.6rem; font-weight:600;
+                letter-spacing:0.18em; text-transform:uppercase; color:#8a95a3; margin-bottom:0.3rem;">
         Global Intelligence Report
     </div>
-    <h1 style="margin:0 0 0.3rem 0; font-family:'Playfair Display',Georgia,serif;
-               font-size:2rem; font-weight:700; color:#1a2340;">
+    <div style="font-family:'Playfair Display',Georgia,serif;
+               font-size:clamp(1.2rem, 4vw, 2rem); font-weight:700; color:#1a2340;
+               line-height:1.2; margin-bottom:0.3rem;">
         Macro-Risk Intelligence Hub
-    </h1>
-    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.85rem; color:#8a95a3;">
-        Real-time monitoring &nbsp;·&nbsp; Multi-source aggregation &nbsp;·&nbsp; AI-powered analysis &nbsp;·&nbsp; 2026
+    </div>
+    <div style="font-family:'Source Sans 3',sans-serif; font-size:clamp(0.72rem, 2vw, 0.85rem);
+                color:#8a95a3; line-height:1.5;">
+        Real-time monitoring &nbsp;·&nbsp; Multi-source aggregation &nbsp;·&nbsp; AI analysis &nbsp;·&nbsp; 2026
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1620,9 +1797,9 @@ if st.session_state.fetched_results:
     price_sources = [(name, data) for name, data in results.items()
                      if isinstance(data, dict) and "price" in data]
     if price_sources:
-        cols = st.columns(4)
+        cols = st.columns(2)
         for i, (name, data) in enumerate(price_sources[:8]):
-            with cols[i % 4]:
+            with cols[i % 2]:
                 st.metric(
                     label=name,
                     value=f"${data['price']:,.2f}",
@@ -1713,8 +1890,8 @@ if st.session_state.fetched_results:
                 ]
 
                 if price_items:
-                    # Render as a tight card grid — 4 per row
-                    cols_per_row = 4
+                    # Render as a tight card grid — 2 per row (mobile-friendly)
+                    cols_per_row = 2
                     for row_start in range(0, len(price_items), cols_per_row):
                         row_items = price_items[row_start:row_start + cols_per_row]
                         cols = st.columns(cols_per_row)
@@ -1982,18 +2159,15 @@ if st.session_state.fetched_results:
         unsafe_allow_html=True
     )
 
-    col_sel, col_btn = st.columns([3, 1])
-    with col_sel:
-        analysis_type = st.selectbox(
-            "Analytical framework",
-            ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
-             "Tech & Digitalization", "Warehouse Ops", "PM Risk",
-             "Crypto", "Geopolitical Power"],
-            key="analysis_selector",
-            label_visibility="collapsed"
-        )
-    with col_btn:
-        generate_clicked = st.button("Generate Briefing", type="primary", use_container_width=True)
+    analysis_type = st.selectbox(
+        "Analytical framework",
+        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
+         "Tech & Digitalization", "Warehouse Ops", "PM Risk",
+         "Crypto", "Geopolitical Power"],
+        key="analysis_selector",
+        label_visibility="collapsed"
+    )
+    generate_clicked = st.button("Generate Briefing", type="primary", use_container_width=True)
 
     prompt_map = {
         "General Macro": "general",
@@ -2081,15 +2255,15 @@ else:
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("## Preview")
-    col1, col2, col3, col4 = st.columns(4)
     placeholder_metrics = [
         ("Crude Oil (WTI)", "—", "—"),
         ("Gold", "—", "—"),
         ("S&P 500", "—", "—"),
         ("VIX", "—", "—"),
     ]
-    for col, (label, val, delta) in zip([col1, col2, col3, col4], placeholder_metrics):
-        with col:
+    cols = st.columns(2)
+    for i, (label, val, delta) in enumerate(placeholder_metrics):
+        with cols[i % 2]:
             st.metric(label=label, value=val, delta=delta)
 
     st.caption("Awaiting data fetch to populate dashboard.")
