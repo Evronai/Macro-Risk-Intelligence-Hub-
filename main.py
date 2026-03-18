@@ -624,21 +624,75 @@ ALL_SOURCES = [
     {"name": "Al Jazeera Business", "type": "rss", "url": "https://www.aljazeera.com/xml/rss/business.xml", "category": "News"},
 
     # ----- GEOPOLITICAL & RISK (15 sources) -----
-    {"name": "ACLED Conflict Data", "type": "api", "url": "https://api.acleddata.com/acled/read", "category": "Geopolitical"},
-    {"name": "GDELT", "type": "api", "url": "https://api.gdeltproject.org/api/v2/summary/summary", "category": "Geopolitical"},
-    {"name": "REST Countries API", "type": "api", "url": "https://restcountries.com/v3.1/all", "category": "Geopolitical"},
-    {"name": "World Bank Country Data", "type": "api", "url": "https://api.worldbank.org/v2/country", "category": "Geopolitical"},
-    {"name": "Nager.Date (Holidays)", "type": "api", "url": "https://date.nager.at/api/v3/publicholidays/2026/US", "category": "Geopolitical"},
-    {"name": "Fragile States Index", "type": "csv", "url": "https://fragilestatesindex.org/data/", "category": "Geopolitical"},
-    {"name": "Transparency CPI", "type": "csv", "url": "https://www.transparency.org/en/cpi/2023", "category": "Geopolitical"},
-    {"name": "Heritage Economic Freedom", "type": "csv", "url": "https://www.heritage.org/index/explore", "category": "Geopolitical"},
-    {"name": "UNDP HDI", "type": "csv", "url": "https://hdr.undp.org/data-center", "category": "Geopolitical"},
-    {"name": "UNHCR Refugee Data", "type": "api", "url": "https://api.unhcr.org/", "category": "Geopolitical"},
-    {"name": "IOM Migration Data", "type": "api", "url": "https://api.iom.int/", "category": "Geopolitical"},
-    {"name": "ND-GAIN Climate Risk", "type": "csv", "url": "https://gain.nd.edu/our-work/country-index/download-data/", "category": "Geopolitical"},
-    {"name": "World Bank Climate", "type": "api", "url": "https://climateknowledgeportal.worldbank.org/api", "category": "Geopolitical"},
-    {"name": "USGS Earthquakes", "type": "api", "url": "https://earthquake.usgs.gov/fdsnws/event/1/query", "category": "Geopolitical"},
-    {"name": "NOAA Climate Data", "type": "api", "url": "https://www.ncdc.noaa.gov/cdo-web/api/v2/data", "category": "Geopolitical"},
+    # USGS: M5.5+ earthquakes in last 30 days (free, no key)
+    {"name": "USGS Earthquakes (M5.5+)",
+     "type": "geo_usgs",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=5.5&limit=10&orderby=time",
+     "category": "Geopolitical"},
+
+    # Open-Meteo: current global weather/climate indicators (free, no key)
+    {"name": "Open-Meteo Climate (London)",
+     "type": "geo_openmeteo",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.12&current=temperature_2m,windspeed_10m,precipitation&timezone=UTC",
+     "category": "Geopolitical"},
+    {"name": "Open-Meteo Climate (New York)",
+     "type": "geo_openmeteo",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=40.71&longitude=-74.01&current=temperature_2m,windspeed_10m,precipitation&timezone=UTC",
+     "category": "Geopolitical"},
+    {"name": "Open-Meteo Climate (Singapore)",
+     "type": "geo_openmeteo",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=1.35&longitude=103.82&current=temperature_2m,windspeed_10m,precipitation&timezone=UTC",
+     "category": "Geopolitical"},
+    {"name": "Open-Meteo Climate (Dubai)",
+     "type": "geo_openmeteo",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=25.20&longitude=55.27&current=temperature_2m,windspeed_10m,precipitation&timezone=UTC",
+     "category": "Geopolitical"},
+
+    # World Bank: key development indicators (free, no key)
+    {"name": "World Bank — Global GDP (current USD)",
+     "type": "geo_worldbank",
+     "indicator": "NY.GDP.MKTP.CD", "country": "WLD",
+     "category": "Geopolitical"},
+    {"name": "World Bank — Global Inflation",
+     "type": "geo_worldbank",
+     "indicator": "FP.CPI.TOTL.ZG", "country": "WLD",
+     "category": "Geopolitical"},
+    {"name": "World Bank — US Debt (% GDP)",
+     "type": "geo_worldbank",
+     "indicator": "GC.DOD.TOTL.GD.ZS", "country": "USA",
+     "category": "Geopolitical"},
+    {"name": "World Bank — China GDP Growth",
+     "type": "geo_worldbank",
+     "indicator": "NY.GDP.MKTP.KD.ZG", "country": "CHN",
+     "category": "Geopolitical"},
+    {"name": "World Bank — EU Unemployment",
+     "type": "geo_worldbank",
+     "indicator": "SL.UEM.TOTL.ZS", "country": "EUU",
+     "category": "Geopolitical"},
+
+    # REST Countries: regional summaries (free, no key) — fixed URL with fields
+    {"name": "REST Countries — Americas",
+     "type": "geo_restcountries",
+     "region": "americas",
+     "category": "Geopolitical"},
+    {"name": "REST Countries — Asia",
+     "type": "geo_restcountries",
+     "region": "asia",
+     "category": "Geopolitical"},
+    {"name": "REST Countries — Europe",
+     "type": "geo_restcountries",
+     "region": "europe",
+     "category": "Geopolitical"},
+
+    # Nager.Date: upcoming US public holidays (free, no key)
+    {"name": "US Public Holidays 2026",
+     "type": "geo_holidays",
+     "url": "https://date.nager.at/api/v3/publicholidays/2026/US",
+     "category": "Geopolitical"},
+    {"name": "UK Public Holidays 2026",
+     "type": "geo_holidays",
+     "url": "https://date.nager.at/api/v3/publicholidays/2026/GB",
+     "category": "Geopolitical"},
 ]
 
 
@@ -667,6 +721,16 @@ class DataSourceManager:
                 return self._fetch_tradingeconomics(source)
             elif source["type"] == "api":
                 return self._fetch_api(source)
+            elif source["type"] == "geo_usgs":
+                return self._fetch_geo_usgs(source)
+            elif source["type"] == "geo_openmeteo":
+                return self._fetch_geo_openmeteo(source)
+            elif source["type"] == "geo_worldbank":
+                return self._fetch_geo_worldbank(source)
+            elif source["type"] == "geo_restcountries":
+                return self._fetch_geo_restcountries(source)
+            elif source["type"] == "geo_holidays":
+                return self._fetch_geo_holidays(source)
             elif source["type"] == "csv":
                 return {"note": "CSV source not fully implemented"}
             else:
@@ -737,6 +801,121 @@ class DataSourceManager:
                 return {"error": f"HTTP {resp.status_code}"}
         except Exception as e:
             return {"error": str(e)}
+
+    def _fetch_geo_usgs(self, source: Dict) -> Dict:
+        """USGS Earthquake Hazards — M5.5+ recent events."""
+        resp = self.session.get(source["url"], timeout=15)
+        if resp.status_code != 200:
+            return {"error": f"HTTP {resp.status_code}"}
+        data = resp.json()
+        features = data.get("features", [])
+        events = []
+        for f in features[:8]:
+            props = f.get("properties", {})
+            coords = f.get("geometry", {}).get("coordinates", [None, None, None])
+            events.append({
+                "place": props.get("place", "Unknown"),
+                "magnitude": props.get("mag", "?"),
+                "depth_km": round(coords[2], 1) if coords[2] is not None else "?",
+                "time": time.strftime("%Y-%m-%d %H:%M", time.gmtime(props["time"] / 1000)) if props.get("time") else "?",
+                "alert": props.get("alert") or "—",
+            })
+        return {
+            "value": f"{len(features)} events",
+            "date": "Last 30 days",
+            "geo_type": "usgs",
+            "events": events,
+        }
+
+    def _fetch_geo_openmeteo(self, source: Dict) -> Dict:
+        """Open-Meteo current weather — free, no API key."""
+        resp = self.session.get(source["url"], timeout=10)
+        if resp.status_code != 200:
+            return {"error": f"HTTP {resp.status_code}"}
+        data = resp.json()
+        current = data.get("current", {})
+        units = data.get("current_units", {})
+        temp = current.get("temperature_2m", "?")
+        wind = current.get("windspeed_10m", "?")
+        precip = current.get("precipitation", "?")
+        temp_u = units.get("temperature_2m", "°C")
+        wind_u = units.get("windspeed_10m", "km/h")
+        return {
+            "value": f"{temp}{temp_u}",
+            "date": current.get("time", ""),
+            "geo_type": "weather",
+            "detail": f"Wind {wind} {wind_u} · Precip {precip} mm",
+        }
+
+    def _fetch_geo_worldbank(self, source: Dict) -> Dict:
+        """World Bank Open Data — indicator for a country, most recent value."""
+        indicator = source["indicator"]
+        country = source["country"]
+        url = f"https://api.worldbank.org/v2/country/{country}/indicator/{indicator}?format=json&mrv=3&per_page=3"
+        resp = self.session.get(url, timeout=12)
+        if resp.status_code != 200:
+            return {"error": f"HTTP {resp.status_code}"}
+        try:
+            payload = resp.json()
+        except Exception:
+            return {"error": "Invalid JSON response"}
+        if not payload or len(payload) < 2 or not payload[1]:
+            return {"error": "No data returned"}
+        # Find first non-null value
+        for obs in payload[1]:
+            if obs.get("value") is not None:
+                raw_val = obs["value"]
+                # Format sensibly
+                if isinstance(raw_val, float) and raw_val > 1_000_000_000:
+                    display = f"${raw_val / 1e12:.2f}T"
+                elif isinstance(raw_val, float):
+                    display = f"{raw_val:.2f}"
+                else:
+                    display = str(raw_val)
+                return {
+                    "value": display,
+                    "date": obs.get("date", ""),
+                    "geo_type": "worldbank",
+                }
+        return {"error": "All recent values null"}
+
+    def _fetch_geo_restcountries(self, source: Dict) -> Dict:
+        """REST Countries v3.1 — summary stats for a region."""
+        region = source["region"]
+        url = f"https://restcountries.com/v3.1/region/{region}?fields=name,population,area,subregion"
+        resp = self.session.get(url, timeout=12)
+        if resp.status_code != 200:
+            return {"error": f"HTTP {resp.status_code}"}
+        try:
+            countries = resp.json()
+        except Exception:
+            return {"error": "Invalid JSON response"}
+        if not isinstance(countries, list):
+            return {"error": "Unexpected response format"}
+        total_pop = sum(c.get("population", 0) for c in countries)
+        total_area = sum(c.get("area") or 0 for c in countries)
+        return {
+            "value": f"{len(countries)} countries",
+            "date": f"Pop: {total_pop / 1e9:.2f}B · Area: {total_area / 1e6:.1f}M km²",
+            "geo_type": "restcountries",
+        }
+
+    def _fetch_geo_holidays(self, source: Dict) -> Dict:
+        """Nager.Date — upcoming public holidays."""
+        resp = self.session.get(source["url"], timeout=10)
+        if resp.status_code != 200:
+            return {"error": f"HTTP {resp.status_code}"}
+        try:
+            holidays = resp.json()
+        except Exception:
+            return {"error": "Invalid JSON response"}
+        today = time.strftime("%Y-%m-%d")
+        upcoming = [h for h in holidays if h.get("date", "") >= today][:5]
+        return {
+            "value": f"{len(holidays)} holidays",
+            "date": f"Next: {upcoming[0]['name']} ({upcoming[0]['date']})" if upcoming else "None upcoming",
+            "geo_type": "holidays",
+        }
 
     def fetch_selected(self, selected_names: List[str], max_workers=10) -> Dict[str, Dict]:
         results = {}
@@ -918,9 +1097,13 @@ def format_results_for_category(results: Dict, category: str) -> pd.DataFrame:
             elif "headlines" in data:
                 rows.append({"Source": src_name, "Value": f"{len(data['headlines'])} headlines", "Change": "—", "Status": "Live"})
             elif "value" in data:
-                rows.append({"Source": src_name, "Value": data['value'], "Change": "—", "Status": "Live"})
+                # Prefer 'detail' over 'date' for secondary column
+                secondary = data.get("detail") or data.get("date") or "—"
+                rows.append({"Source": src_name, "Value": data["value"], "Change": secondary, "Status": "Live"})
             elif "data" in data:
                 rows.append({"Source": src_name, "Value": "API data received", "Change": "—", "Status": "Live"})
+            elif "note" in data:
+                rows.append({"Source": src_name, "Value": "—", "Change": data["note"], "Status": "Info"})
             else:
                 rows.append({"Source": src_name, "Value": "Received", "Change": "—", "Status": "Live"})
     return pd.DataFrame(rows)
@@ -1529,6 +1712,56 @@ if st.session_state.fetched_results:
                         </tbody>
                     </table>
                     """, unsafe_allow_html=True)
+
+                    # ── USGS Earthquake detail panel ──
+                    usgs_data = next(
+                        (data for name, data in results.items()
+                         if "USGS" in name and isinstance(data, dict) and data.get("geo_type") == "usgs"),
+                        None
+                    )
+                    if usgs_data and usgs_data.get("events"):
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown(
+                            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.65rem; "
+                            "font-weight:600; letter-spacing:0.14em; text-transform:uppercase; "
+                            "color:#8a95a3; margin-bottom:0.5rem;'>Recent Significant Earthquakes (M5.5+)</div>",
+                            unsafe_allow_html=True
+                        )
+                        rows_html = """
+                        <table style="width:100%; border-collapse:collapse;
+                                      font-family:'Source Sans 3',sans-serif; font-size:0.8rem;">
+                            <thead>
+                                <tr style="background:#1a2340;">
+                                    <th style="padding:0.5rem 0.8rem; text-align:left; color:#fff;
+                                               font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;">Location</th>
+                                    <th style="padding:0.5rem 0.8rem; text-align:center; color:#fff;
+                                               font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;">Magnitude</th>
+                                    <th style="padding:0.5rem 0.8rem; text-align:center; color:#fff;
+                                               font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;">Depth (km)</th>
+                                    <th style="padding:0.5rem 0.8rem; text-align:left; color:#fff;
+                                               font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;">Time (UTC)</th>
+                                    <th style="padding:0.5rem 0.8rem; text-align:center; color:#fff;
+                                               font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;">Alert</th>
+                                </tr>
+                            </thead><tbody>"""
+                        for idx, ev in enumerate(usgs_data["events"]):
+                            mag = ev["magnitude"]
+                            mag_color = "#c0392b" if mag and float(mag) >= 7.0 else ("#e67e22" if mag and float(mag) >= 6.0 else "#1a2340")
+                            bg = "#f5f7fb" if idx % 2 == 0 else "#ffffff"
+                            rows_html += f"""
+                            <tr style="background:{bg}; border-bottom:1px solid #e2e6ed;">
+                                <td style="padding:0.48rem 0.8rem; color:#0f1923;">{ev['place']}</td>
+                                <td style="padding:0.48rem 0.8rem; text-align:center;
+                                           font-family:'Source Code Pro',monospace; font-weight:700;
+                                           color:{mag_color};">{mag}</td>
+                                <td style="padding:0.48rem 0.8rem; text-align:center;
+                                           font-family:'Source Code Pro',monospace; color:#4a5568;">{ev['depth_km']}</td>
+                                <td style="padding:0.48rem 0.8rem; color:#8a95a3; font-size:0.75rem;">{ev['time']}</td>
+                                <td style="padding:0.48rem 0.8rem; text-align:center; color:#8a95a3; font-size:0.75rem;">{ev['alert']}</td>
+                            </tr>"""
+                        rows_html += "</tbody></table>"
+                        st.markdown(rows_html, unsafe_allow_html=True)
+
                 else:
                     st.markdown(
                         "<div style='color:#8a95a3; font-size:0.82rem; padding:1.5rem 0; text-align:center;'>"
