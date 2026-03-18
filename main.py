@@ -106,12 +106,14 @@ st.markdown("""
     [data-testid="stSidebar"] > div {
         padding-top: 0 !important;
     }
-    /* Hide the default Streamlit sidebar header that duplicates the title */
-    [data-testid="stSidebarHeader"] {
-        display: none !important;
-    }
-    [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
+    /* Hide the default Streamlit sidebar header that duplicates the title — desktop only */
+    @media (min-width: 769px) {
+        [data-testid="stSidebarHeader"] {
+            display: none !important;
+        }
+        [data-testid="stSidebarCollapseButton"] {
+            display: none !important;
+        }
     }
     [data-testid="stSidebar"] * {
         font-family: var(--font-body) !important;
@@ -712,11 +714,41 @@ st.markdown("""
             word-break: break-word;
         }
 
-        /* Sidebar — already hidden by Streamlit on mobile,
-           but ensure no overflow when open */
+        /* Sidebar — restore toggle button on mobile so it can be opened */
+        [data-testid="stSidebarCollapseButton"] {
+            display: flex !important;
+            background-color: var(--accent-navy) !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+            border-radius: 4px !important;
+            color: #ffffff !important;
+        }
+        [data-testid="stSidebarCollapseButton"] svg {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+        }
+        [data-testid="stSidebarHeader"] {
+            display: flex !important;
+            background-color: var(--accent-navy) !important;
+            padding: 0.5rem 0.75rem !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        /* Sidebar slides in full-width-ish on mobile */
         [data-testid="stSidebar"] {
-            min-width: 260px !important;
-            max-width: 85vw !important;
+            min-width: 280px !important;
+            max-width: 88vw !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        /* Sidebar inner content scrollable */
+        [data-testid="stSidebar"] > div:first-child {
+            overflow-y: auto !important;
+            height: 100vh !important;
+            padding-bottom: 3rem !important;
+        }
+        /* Sidebar multiselect tags wrap properly on narrow width */
+        [data-testid="stSidebar"] [data-baseweb="tag"] {
+            max-width: 180px !important;
+            overflow: hidden !important;
         }
 
         /* Empty state card */
