@@ -43,27 +43,43 @@ st.markdown("""
 
     /* ── CSS Variables ── */
     :root {
-        --bg-primary: #f7f8fa;
-        --bg-secondary: #ffffff;
-        --bg-sidebar: #1a2340;
-        --bg-sidebar-hover: #243058;
-        --accent-navy: #1a2340;
-        --accent-blue: #003087;
-        --accent-gold: #c8960c;
-        --accent-red: #c0392b;
-        --accent-green: #1a7a4a;
-        --text-primary: #0f1923;
-        --text-secondary: #4a5568;
-        --text-muted: #8a95a3;
-        --text-sidebar: #b8c4d8;
-        --text-sidebar-label: #7a8ba8;
-        --border-light: #e2e6ed;
-        --border-medium: #c8cfd9;
-        --shadow-card: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-        --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
-        --font-display: 'Playfair Display', Georgia, serif;
-        --font-body: 'Source Sans 3', 'Helvetica Neue', sans-serif;
-        --font-mono: 'Source Code Pro', 'Courier New', monospace;
+        --bg-primary:        #f4f5f8;
+        --bg-secondary:      #ffffff;
+        --bg-tint-blue:      #eef2f9;
+        --bg-tint-gold:      #fdf8ed;
+        --bg-tint-green:     #edf7f2;
+        --bg-tint-slate:     #f0f3f8;
+        --bg-sidebar:        #1a2340;
+        --bg-sidebar-hover:  #243058;
+        --accent-navy:       #1a2340;
+        --accent-blue:       #2655a3;
+        --accent-blue-light: #dce8f7;
+        --accent-gold:       #c8960c;
+        --accent-gold-light: #fdefc8;
+        --accent-teal:       #0e7490;
+        --accent-teal-light: #cff0f8;
+        --accent-indigo:     #4f46e5;
+        --accent-indigo-light: #ede9fe;
+        --accent-amber:      #b45309;
+        --accent-amber-light:#fef3c7;
+        --accent-red:        #b91c1c;
+        --accent-red-light:  #fee2e2;
+        --accent-green:      #166534;
+        --accent-green-light:#dcfce7;
+        --accent-rose:       #9f1239;
+        --accent-rose-light: #ffe4e6;
+        --text-primary:      #0f1923;
+        --text-secondary:    #374151;
+        --text-muted:        #6b7280;
+        --text-sidebar:      #b8c4d8;
+        --text-sidebar-label:#7a8ba8;
+        --border-light:      #e2e6ed;
+        --border-medium:     #c8cfd9;
+        --shadow-card:       0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+        --shadow-hover:      0 4px 20px rgba(0,0,0,0.11);
+        --font-display:      'Playfair Display', Georgia, serif;
+        --font-body:         'Source Sans 3', 'Helvetica Neue', sans-serif;
+        --font-mono:         'Source Code Pro', 'Courier New', monospace;
     }
 
     /* ── Reset & Base ── */
@@ -77,9 +93,14 @@ st.markdown("""
         border-bottom: 2px solid var(--accent-navy);
     }
 
+    /* ── Main content area — subtle warm tint ── */
+    .main .block-container {
+        background: linear-gradient(160deg, #f4f5f8 0%, #f0f4fb 100%);
+    }
+
     /* ── Sidebar ── */
     [data-testid="stSidebar"] {
-        background-color: var(--bg-sidebar) !important;
+        background: linear-gradient(180deg, #1a2340 0%, #1e2a50 100%) !important;
         border-right: none;
     }
     [data-testid="stSidebar"] > div {
@@ -145,7 +166,7 @@ st.markdown("""
         transition: background-color 0.2s;
     }
     [data-testid="stSidebar"] .stButton button:hover {
-        background-color: #004bb5 !important;
+        background-color: #1d4494 !important;
     }
 
     /* ── Main Headings ── */
@@ -184,27 +205,6 @@ st.markdown("""
         text-transform: uppercase;
     }
 
-    /* ── Subtitle / tagline ── */
-    .report-tagline {
-        font-family: var(--font-body);
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        font-weight: 400;
-        letter-spacing: 0.02em;
-        margin-top: -0.6rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-    .report-tagline .dot {
-        width: 6px;
-        height: 6px;
-        background: var(--accent-gold);
-        border-radius: 50%;
-        display: inline-block;
-    }
-
     /* ── Section divider ── */
     hr {
         border: none;
@@ -212,18 +212,42 @@ st.markdown("""
         margin: 1.5rem 0;
     }
 
+    /* ── Section label tint blocks ── */
+    .section-market {
+        background: linear-gradient(90deg, var(--bg-tint-blue) 0%, transparent 100%);
+        border-left: 3px solid var(--accent-blue);
+        padding: 0.5rem 0.9rem;
+        margin-bottom: 1rem;
+        border-radius: 0 3px 3px 0;
+    }
+    .section-data {
+        background: linear-gradient(90deg, var(--bg-tint-slate) 0%, transparent 100%);
+        border-left: 3px solid var(--accent-teal);
+        padding: 0.5rem 0.9rem;
+        margin-bottom: 1rem;
+        border-radius: 0 3px 3px 0;
+    }
+    .section-ai {
+        background: linear-gradient(90deg, var(--bg-tint-gold) 0%, transparent 100%);
+        border-left: 3px solid var(--accent-gold);
+        padding: 0.5rem 0.9rem;
+        margin-bottom: 1rem;
+        border-radius: 0 3px 3px 0;
+    }
+
     /* ── Metrics ── */
     [data-testid="stMetric"] {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border-light);
-        border-top: 3px solid var(--accent-navy);
+        border-top: 3px solid var(--accent-blue);
         border-radius: 3px;
         padding: 1rem 1.1rem;
         box-shadow: var(--shadow-card);
-        transition: box-shadow 0.2s;
+        transition: box-shadow 0.2s, border-top-color 0.2s;
     }
     [data-testid="stMetric"]:hover {
         box-shadow: var(--shadow-hover);
+        border-top-color: var(--accent-gold);
     }
     [data-testid="stMetricLabel"] {
         font-family: var(--font-body) !important;
@@ -265,16 +289,16 @@ st.markdown("""
         padding: 0.7rem 1.2rem;
         border-radius: 0;
         margin-bottom: -2px;
-        transition: color 0.15s;
+        transition: color 0.15s, background-color 0.15s;
     }
     .stTabs [data-baseweb="tab"]:hover {
-        color: var(--accent-navy);
-        background-color: rgba(0, 0, 0, 0.02);
+        color: var(--accent-blue);
+        background-color: var(--bg-tint-blue);
     }
     .stTabs [aria-selected="true"] {
-        color: var(--accent-navy) !important;
-        border-bottom: 2px solid var(--accent-navy) !important;
-        background-color: transparent !important;
+        color: var(--accent-blue) !important;
+        border-bottom: 2px solid var(--accent-blue) !important;
+        background-color: var(--bg-tint-blue) !important;
         font-weight: 600 !important;
     }
 
@@ -297,10 +321,10 @@ st.markdown("""
         padding: 0.6rem 0.8rem !important;
     }
     .stDataFrame tbody tr:nth-child(even) {
-        background-color: #f5f7fb !important;
+        background-color: #f0f4fb !important;
     }
     .stDataFrame tbody tr:hover {
-        background-color: #eef1f8 !important;
+        background-color: var(--bg-tint-blue) !important;
     }
     .stDataFrame tbody tr td {
         color: var(--text-primary) !important;
@@ -322,11 +346,10 @@ st.markdown("""
         transition: all 0.2s;
     }
     .stButton button:hover {
-        background-color: var(--accent-navy);
-        color: #ffffff;
-        border-color: var(--accent-navy);
+        background-color: var(--bg-tint-blue);
+        color: var(--accent-blue);
+        border-color: var(--accent-blue);
     }
-    /* Primary button */
     .stButton button[kind="primary"] {
         background-color: var(--accent-navy) !important;
         color: #ffffff !important;
@@ -339,33 +362,32 @@ st.markdown("""
     /* ── Alerts / Info boxes ── */
     .stAlert {
         border-radius: 3px !important;
-        border-left: 4px solid var(--accent-navy) !important;
-        background-color: #f0f3f9 !important;
+        border-left: 4px solid var(--accent-blue) !important;
+        background-color: var(--bg-tint-blue) !important;
         font-family: var(--font-body) !important;
         font-size: 0.82rem !important;
     }
-    .stAlert p {
-        color: var(--text-secondary) !important;
-    }
+    .stAlert p { color: var(--text-secondary) !important; }
 
     /* ── Success / Warning / Error ── */
     [data-testid="stNotification"][data-type="success"] {
         border-left-color: var(--accent-green) !important;
-        background-color: #f0faf5 !important;
+        background-color: var(--accent-green-light) !important;
     }
     [data-testid="stNotification"][data-type="warning"] {
-        border-left-color: var(--accent-gold) !important;
-        background-color: #fdf8ee !important;
+        border-left-color: var(--accent-amber) !important;
+        background-color: var(--accent-amber-light) !important;
     }
     [data-testid="stNotification"][data-type="error"] {
         border-left-color: var(--accent-red) !important;
-        background-color: #fdf0ef !important;
+        background-color: var(--accent-red-light) !important;
     }
 
     /* ── Status widget ── */
     [data-testid="stStatusWidget"] {
-        background-color: var(--bg-secondary) !important;
-        border: 1px solid var(--border-light) !important;
+        background-color: var(--bg-tint-blue) !important;
+        border: 1px solid var(--accent-blue-light) !important;
+        border-left: 3px solid var(--accent-blue) !important;
         border-radius: 3px !important;
         font-family: var(--font-body) !important;
     }
@@ -381,9 +403,9 @@ st.markdown("""
 
     /* ── Download button ── */
     .stDownloadButton button {
-        background-color: transparent !important;
+        background-color: var(--bg-tint-blue) !important;
         color: var(--accent-blue) !important;
-        border: 1.5px solid var(--accent-blue) !important;
+        border: 1.5px solid var(--accent-blue-light) !important;
         font-size: 0.76rem !important;
         font-weight: 600 !important;
         letter-spacing: 0.06em;
@@ -392,6 +414,7 @@ st.markdown("""
     .stDownloadButton button:hover {
         background-color: var(--accent-blue) !important;
         color: #ffffff !important;
+        border-color: var(--accent-blue) !important;
     }
 
     /* ── Selectbox ── */
@@ -411,11 +434,13 @@ st.markdown("""
         font-family: var(--font-body) !important;
         color: var(--text-primary) !important;
     }
+    .stTextInput input:focus {
+        border-color: var(--accent-blue) !important;
+        box-shadow: 0 0 0 2px var(--accent-blue-light) !important;
+    }
 
     /* ── Spinner ── */
-    .stSpinner > div {
-        border-top-color: var(--accent-navy) !important;
-    }
+    .stSpinner > div { border-top-color: var(--accent-blue) !important; }
 
     /* ── Caption / small text ── */
     .stCaption, caption {
@@ -426,15 +451,15 @@ st.markdown("""
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f0f2f5; }
-    ::-webkit-scrollbar-thumb { background: #c0c8d4; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #a0aab8; }
+    ::-webkit-scrollbar-track { background: #eef1f6; }
+    ::-webkit-scrollbar-thumb { background: #b8c4d8; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8a9ab8; }
 
-    /* ── AI Briefing markdown output ── */
+    /* ── AI Briefing output ── */
     .briefing-container {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border-light);
-        border-top: 3px solid var(--accent-navy);
+        border-top: 3px solid var(--accent-gold);
         border-radius: 3px;
         padding: 2rem 2.4rem;
         box-shadow: var(--shadow-card);
@@ -459,9 +484,7 @@ st.markdown("""
         color: var(--text-secondary);
         margin-bottom: 0.3rem;
     }
-    .briefing-container strong {
-        color: var(--accent-navy);
-    }
+    .briefing-container strong { color: var(--accent-navy); }
     .briefing-container table {
         border-collapse: collapse;
         width: 100%;
@@ -479,12 +502,12 @@ st.markdown("""
         border-bottom: 1px solid var(--border-light);
     }
     .briefing-container table tr:nth-child(even) td {
-        background-color: #f5f7fb;
+        background-color: var(--bg-tint-blue);
     }
 
-    /* ── Header bar ── */
+    /* ── Page header banner ── */
     .page-header {
-        background-color: var(--accent-navy);
+        background: linear-gradient(90deg, #1a2340 0%, #2a3a60 100%);
         margin: -1rem -1rem 1.5rem -1rem;
         padding: 1.2rem 2rem;
         display: flex;
@@ -492,11 +515,11 @@ st.markdown("""
         justify-content: space-between;
     }
 
-    /* ── Preview placeholder cards ── */
+    /* ── Placeholder cards ── */
     .placeholder-card {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border-light);
-        border-top: 3px solid #e2e6ed;
+        border-top: 3px solid var(--border-medium);
         border-radius: 3px;
         padding: 1rem;
         text-align: center;
@@ -504,7 +527,7 @@ st.markdown("""
 
     /* ── Multiselect tags ── */
     [data-baseweb="tag"] {
-        background-color: var(--accent-navy) !important;
+        background-color: var(--accent-blue) !important;
         border-radius: 2px !important;
     }
     [data-baseweb="tag"] span {
@@ -513,25 +536,30 @@ st.markdown("""
         font-size: 0.72rem !important;
     }
 
-    /* ── Status badge ── */
-    .status-badge {
+    /* ── Status badges ── */
+    .badge-live {
         display: inline-block;
         padding: 0.15rem 0.5rem;
+        background-color: var(--accent-green-light);
+        color: var(--accent-green);
+        border: 1px solid #bbf7d0;
         border-radius: 2px;
         font-size: 0.68rem;
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
     }
-    .badge-live {
-        background-color: #e8f5f0;
-        color: var(--accent-green);
-        border: 1px solid #c0e0d0;
-    }
     .badge-pending {
-        background-color: #fdf8ee;
-        color: #a07000;
-        border: 1px solid #edd090;
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        background-color: var(--accent-amber-light);
+        color: var(--accent-amber);
+        border: 1px solid #fde68a;
+        border-radius: 2px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 
 </style>
@@ -1571,7 +1599,14 @@ if st.session_state.fetched_results:
     results = st.session_state.fetched_results
 
     # ── Spot Prices ──
-    st.markdown("## Market Snapshot")
+    st.markdown("""
+    <div class="section-market">
+        <span style="font-family:'Source Sans 3',sans-serif; font-size:0.65rem; font-weight:600;
+                     letter-spacing:0.18em; text-transform:uppercase; color:#2655a3;">
+            Market Snapshot
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     price_sources = [(name, data) for name, data in results.items()
                      if isinstance(data, dict) and "price" in data]
@@ -1591,20 +1626,27 @@ if st.session_state.fetched_results:
     st.divider()
 
     # ── Category Tabs ──
-    st.markdown("## Data by Category")
+    st.markdown("""
+    <div class="section-data">
+        <span style="font-family:'Source Sans 3',sans-serif; font-size:0.65rem; font-weight:600;
+                     letter-spacing:0.18em; text-transform:uppercase; color:#0e7490;">
+            Data by Category
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Category metadata: icon, description, display mode
     CATEGORY_META = {
-        "Energy":       {"icon": "⚡", "desc": "Crude, gas, refined products & renewables", "mode": "cards"},
-        "Metals":       {"icon": "🪙", "desc": "Precious & industrial metals",              "mode": "cards"},
-        "Agriculture":  {"icon": "🌾", "desc": "Grains, softs & livestock",                 "mode": "cards"},
-        "Economic":     {"icon": "📈", "desc": "GDP, inflation, employment indicators",      "mode": "kv"},
-        "Monetary":     {"icon": "🏦", "desc": "Central bank rates & treasury yields",       "mode": "cards"},
-        "Currency":     {"icon": "💱", "desc": "Major FX pairs & dollar index",              "mode": "cards"},
-        "Equities":     {"icon": "📊", "desc": "Equity indices & volatility",               "mode": "cards"},
-        "Crypto":       {"icon": "₿",  "desc": "Digital asset prices",                      "mode": "cards"},
-        "News":         {"icon": "📰", "desc": "Real-time headlines from global sources",   "mode": "news"},
-        "Geopolitical": {"icon": "🌐", "desc": "Risk indices, conflict & climate data",     "mode": "kv"},
+        "Energy":       {"icon": "⚡", "desc": "Crude, gas, refined products & renewables", "mode": "cards", "color": "#b45309", "bg": "#fef3c7"},
+        "Metals":       {"icon": "🪙", "desc": "Precious & industrial metals",              "mode": "cards", "color": "#6b7280", "bg": "#f3f4f6"},
+        "Agriculture":  {"icon": "🌾", "desc": "Grains, softs & livestock",                 "mode": "cards", "color": "#166534", "bg": "#dcfce7"},
+        "Economic":     {"icon": "📈", "desc": "GDP, inflation, employment indicators",      "mode": "kv",    "color": "#1d4ed8", "bg": "#dbeafe"},
+        "Monetary":     {"icon": "🏦", "desc": "Central bank rates & treasury yields",       "mode": "cards", "color": "#1a2340", "bg": "#e0e7ff"},
+        "Currency":     {"icon": "💱", "desc": "Major FX pairs & dollar index",              "mode": "cards", "color": "#0e7490", "bg": "#cff0f8"},
+        "Equities":     {"icon": "📊", "desc": "Equity indices & volatility",               "mode": "cards", "color": "#2655a3", "bg": "#dce8f7"},
+        "Crypto":       {"icon": "₿",  "desc": "Digital asset prices",                      "mode": "cards", "color": "#7c3aed", "bg": "#ede9fe"},
+        "News":         {"icon": "📰", "desc": "Real-time headlines from global sources",   "mode": "news",  "color": "#374151", "bg": "#f3f4f6"},
+        "Geopolitical": {"icon": "🌐", "desc": "Risk indices, conflict & climate data",     "mode": "kv",    "color": "#9f1239", "bg": "#ffe4e6"},
     }
 
     tab_labels = list(CATEGORY_META.keys())
@@ -1640,9 +1682,10 @@ if st.session_state.fetched_results:
             # Tab sub-header
             st.markdown(
                 f"<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.78rem; "
-                f"color:#8a95a3; margin-bottom:1.2rem; padding-bottom:0.6rem; "
-                f"border-bottom:1px solid #e2e6ed;'>"
-                f"<span style='font-weight:600; color:#1a2340;'>{meta['icon']} {category}</span>"
+                f"color:#8a95a3; margin-bottom:1.2rem; padding:0.5rem 0.9rem; "
+                f"background:linear-gradient(90deg,{meta['bg']} 0%,transparent 100%); "
+                f"border-left:3px solid {meta['color']}; border-radius:0 3px 3px 0;'>"
+                f"<span style='font-weight:600; color:{meta['color']};'>{meta['icon']} {category}</span>"
                 f"&nbsp;·&nbsp;{meta['desc']}</div>",
                 unsafe_allow_html=True
             )
@@ -1676,7 +1719,7 @@ if st.session_state.fetched_results:
                             with col:
                                 st.markdown(f"""
                                 <div style="background:#ffffff; border:1px solid #e2e6ed;
-                                            border-left:3px solid #1a2340; border-radius:3px;
+                                            border-left:3px solid {meta['color']}; border-radius:3px;
                                             padding:0.9rem 1rem; margin-bottom:0.8rem;
                                             box-shadow:0 1px 3px rgba(0,0,0,0.06);">
                                     <div style="font-family:'Source Sans 3',sans-serif;
@@ -1915,7 +1958,14 @@ if st.session_state.fetched_results:
 
     # ── AI Analysis ──
     st.divider()
-    st.markdown("## AI Strategic Analysis")
+    st.markdown("""
+    <div class="section-ai">
+        <span style="font-family:'Source Sans 3',sans-serif; font-size:0.65rem; font-weight:600;
+                     letter-spacing:0.18em; text-transform:uppercase; color:#b45309;">
+            AI Strategic Analysis
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown(
         "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.85rem; color:#4a5568; "
         "margin-bottom:1rem;'>Select an analytical framework and generate a forward-looking "
