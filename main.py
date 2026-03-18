@@ -31,7 +31,7 @@ st.set_page_config(
     page_title="Macro-Risk Intelligence Hub",
     page_icon="🌍",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ==========================================
@@ -1670,137 +1670,50 @@ if "last_fetch_time" not in st.session_state:
 
 
 # ==========================================
-# 8. SIDEBAR
+# 8. CONFIGURATION PANEL (expander — mobile friendly)
 # ==========================================
+
+# Resolve API key from secrets/env first
+api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+if not api_key:
+    try:
+        api_key = st.secrets["DEEPSEEK_API_KEY"]
+    except:
+        pass
+
+# Default sources list
+_DEFAULT_PER_CATEGORY = {
+    "Energy":       ["Crude Oil (WTI)", "Brent Oil", "Natural Gas", "RBOB Gasoline", "Heating Oil"],
+    "Metals":       ["Gold", "Silver", "Copper", "Platinum"],
+    "Agriculture":  ["Wheat", "Corn", "Soybeans", "Coffee"],
+    "Economic":     ["US GDP (Current USD)", "US GDP Growth Rate", "US Unemployment Rate",
+                     "US CPI Inflation", "UK Unemployment Rate", "Eurozone GDP Growth",
+                     "Japan CPI Inflation", "India GDP Growth", "Australia CPI Inflation",
+                     "China PMI (Shanghai Comp)"],
+    "Monetary":     ["US Fed Funds Rate", "US 10-Year Treasury", "US 2-Year Treasury",
+                     "Brazil Interest Rate (EWZ)"],
+    "Currency":     ["US Dollar Index", "EUR/USD", "GBP/USD", "USD/JPY", "USD/CNY"],
+    "Equities":     ["S&P 500", "Dow Jones", "NASDAQ", "Russell 2000",
+                     "FTSE 100", "DAX", "Nikkei 225", "Hang Seng", "VIX"],
+    "Crypto":       ["Bitcoin", "Ethereum", "Solana", "XRP"],
+    "News":         ["BBC Business", "BBC World", "Reuters Business",
+                     "CNBC World News", "OilPrice.com", "gCaptain",
+                     "The Guardian Economics", "Al Jazeera Business"],
+    "Geopolitical": ["USGS Earthquakes (M5.5+)",
+                     "Open-Meteo Climate (London)", "Open-Meteo Climate (New York)",
+                     "World Bank — Global GDP (current USD)", "World Bank — Global Inflation",
+                     "World Bank — US Debt (% GDP)", "World Bank — China GDP Growth",
+                     "World Bank — EU Unemployment",
+                     "REST Countries — Americas", "REST Countries — Europe",
+                     "US Public Holidays 2026", "UK Public Holidays 2026"],
+}
+_all_defaults = [s for names in _DEFAULT_PER_CATEGORY.values() for s in names
+                 if any(src["name"] == s for src in ALL_SOURCES)]
+
+# Keep also a minimal sidebar (just collapse button target — hidden visually)
 with st.sidebar:
-    # Firm-style header
-    st.markdown("""
-    <div style="background:#1a2340; margin:-1rem -1rem 0 -1rem; padding:1.4rem 1.2rem 1rem 1.2rem; border-bottom:2px solid #c8960c;">
-        <div style="font-family:'Source Sans 3',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:#7a8ba8; margin-bottom:0.3rem;">
-            INTELLIGENCE PLATFORM
-        </div>
-        <div style="font-family:'Playfair Display',Georgia,serif; font-size:1.1rem; font-weight:700; color:#ffffff; line-height:1.2;">
-            Macro-Risk Hub
-        </div>
-        <div style="font-size:0.68rem; color:#7a8ba8; margin-top:0.3rem; font-family:'Source Sans 3',sans-serif;">
-            2026 Edition
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<!-- sidebar placeholder -->", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # API Key
-    st.markdown("## API Configuration")
-    api_key = st.text_input("DeepSeek API Key", type="password", placeholder="sk-...")
-    if not api_key:
-        api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key:
-        try:
-            api_key = st.secrets["DEEPSEEK_API_KEY"]
-        except:
-            pass
-
-    if api_key:
-        st.success("API key configured")
-    else:
-        st.warning("API key required for AI analysis")
-
-    st.markdown("---")
-
-    # Data Sources
-    st.markdown("## Data Sources")
-
-    # Build a recommended default: top sources from every category
-    _DEFAULT_PER_CATEGORY = {
-        "Energy":       ["Crude Oil (WTI)", "Brent Oil", "Natural Gas", "RBOB Gasoline", "Heating Oil"],
-        "Metals":       ["Gold", "Silver", "Copper", "Platinum"],
-        "Agriculture":  ["Wheat", "Corn", "Soybeans", "Coffee"],
-        "Economic":     ["US GDP (Current USD)", "US GDP Growth Rate", "US Unemployment Rate",
-                         "US CPI Inflation", "UK Unemployment Rate", "Eurozone GDP Growth",
-                         "Japan CPI Inflation", "India GDP Growth", "Australia CPI Inflation",
-                         "China PMI (Shanghai Comp)"],
-        "Monetary":     ["US Fed Funds Rate", "US 10-Year Treasury", "US 2-Year Treasury",
-                         "Brazil Interest Rate (EWZ)"],
-        "Currency":     ["US Dollar Index", "EUR/USD", "GBP/USD", "USD/JPY", "USD/CNY"],
-        "Equities":     ["S&P 500", "Dow Jones", "NASDAQ", "Russell 2000",
-                         "FTSE 100", "DAX", "Nikkei 225", "Hang Seng", "VIX"],
-        "Crypto":       ["Bitcoin", "Ethereum", "Solana", "XRP"],
-        "News":         ["BBC Business", "BBC World", "Reuters Business",
-                         "CNBC World News", "OilPrice.com", "gCaptain",
-                         "The Guardian Economics", "Al Jazeera Business"],
-        "Geopolitical": ["USGS Earthquakes (M5.5+)",
-                         "Open-Meteo Climate (London)", "Open-Meteo Climate (New York)",
-                         "World Bank — Global GDP (current USD)", "World Bank — Global Inflation",
-                         "World Bank — US Debt (% GDP)", "World Bank — China GDP Growth",
-                         "World Bank — EU Unemployment",
-                         "REST Countries — Americas", "REST Countries — Europe",
-                         "US Public Holidays 2026", "UK Public Holidays 2026"],
-    }
-    _all_defaults = [s for names in _DEFAULT_PER_CATEGORY.values() for s in names
-                     if any(src["name"] == s for src in ALL_SOURCES)]
-
-    categories = list(set(s["category"] for s in ALL_SOURCES))
-    selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
-
-    filtered_sources = ALL_SOURCES
-    if selected_category != "All":
-        filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
-
-    source_names = [s["name"] for s in filtered_sources]
-
-    # Quick-select buttons
-    col_a, col_b = st.columns(2)
-    with col_a:
-        if st.button("✓ Select All", use_container_width=True, key="sel_all"):
-            st.session_state["_src_selection"] = source_names
-    with col_b:
-        if st.button("✕ Clear", use_container_width=True, key="sel_none"):
-            st.session_state["_src_selection"] = []
-
-    # Determine default: session override → recommended defaults → first 10
-    if "_src_selection" in st.session_state:
-        _default = [s for s in st.session_state["_src_selection"] if s in source_names]
-    else:
-        _default = [s for s in _all_defaults if s in source_names] or source_names[:10]
-
-    selected_sources = st.multiselect(
-        "Active sources",
-        options=source_names,
-        default=_default,
-        key="source_multiselect"
-    )
-    # Keep session state in sync
-    st.session_state["_src_selection"] = selected_sources
-
-    st.caption(f"{len(selected_sources)} of {len(source_names)} sources selected")
-
-
-    st.markdown("## Refresh Settings")
-    update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    fetch_clicked = st.button("Fetch Selected Sources", use_container_width=True, type="primary")
-    if fetch_clicked:
-        with st.spinner(f"Retrieving data from {len(selected_sources)} sources…"):
-            results = st.session_state.data_manager.fetch_selected(selected_sources)
-            st.session_state.fetched_results = results
-            st.session_state.last_fetch_time = time.time()
-            success_count = sum(1 for v in results.values() if "error" not in v)
-            st.success(f"{success_count} of {len(selected_sources)} sources retrieved")
-
-    if st.session_state.last_fetch_time:
-        st.caption(f"Last updated: {time.strftime('%H:%M:%S', time.localtime(st.session_state.last_fetch_time))}")
-
-    st.markdown("---")
-    st.markdown("""
-    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.65rem; color:#4a5a70; line-height:1.6; padding-bottom:0.5rem;">
-        © 2026 Macro-Risk Intelligence Hub<br>
-        All data sourced from public APIs.<br>
-        For informational purposes only.
-    </div>
-    """, unsafe_allow_html=True)
 
 
 # ==========================================
@@ -1825,6 +1738,83 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ── Settings panel — expander works on all devices ──
+with st.expander("⚙️ Settings & Data Sources", expanded=not bool(st.session_state.fetched_results)):
+
+    # API Key row
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        _key_input = st.text_input("DeepSeek API Key", type="password",
+                                   placeholder="sk-...", value=api_key or "",
+                                   label_visibility="collapsed",
+                                   help="Enter your DeepSeek API key for AI analysis")
+        if _key_input:
+            api_key = _key_input
+    with c2:
+        if api_key:
+            st.success("✓ API key set")
+        else:
+            st.warning("API key required")
+
+    st.divider()
+
+    # Source filter + quick-select
+    col_cat, col_a, col_b = st.columns([3, 1, 1])
+    with col_cat:
+        categories = list(set(s["category"] for s in ALL_SOURCES))
+        selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories),
+                                         label_visibility="collapsed")
+    with col_a:
+        if st.button("✓ All", use_container_width=True, key="sel_all"):
+            filtered = ALL_SOURCES if selected_category == "All" else [s for s in ALL_SOURCES if s["category"] == selected_category]
+            st.session_state["_src_selection"] = [s["name"] for s in filtered]
+    with col_b:
+        if st.button("✕ Clear", use_container_width=True, key="sel_none"):
+            st.session_state["_src_selection"] = []
+
+    filtered_sources = ALL_SOURCES if selected_category == "All" else \
+                       [s for s in ALL_SOURCES if s["category"] == selected_category]
+    source_names = [s["name"] for s in filtered_sources]
+
+    if "_src_selection" in st.session_state:
+        _default = [s for s in st.session_state["_src_selection"] if s in source_names]
+    else:
+        _default = [s for s in _all_defaults if s in source_names] or source_names[:10]
+
+    selected_sources = st.multiselect(
+        "Active sources",
+        options=source_names,
+        default=_default,
+        key="source_multiselect",
+        label_visibility="collapsed"
+    )
+    st.session_state["_src_selection"] = selected_sources
+    st.caption(f"{len(selected_sources)} of {len(source_names)} sources selected")
+
+    st.divider()
+
+    # Fetch row
+    fc1, fc2 = st.columns([2, 1])
+    with fc1:
+        update_freq = st.slider("Cache (s)", 300, 7200, 3600, step=300, label_visibility="collapsed")
+    with fc2:
+        fetch_clicked = st.button("Fetch Data", use_container_width=True, type="primary")
+
+    if fetch_clicked:
+        with st.spinner(f"Fetching {len(selected_sources)} sources…"):
+            _results = st.session_state.data_manager.fetch_selected(selected_sources)
+            st.session_state.fetched_results = _results
+            st.session_state.last_fetch_time = time.time()
+            _ok = sum(1 for v in _results.values() if "error" not in v)
+            st.success(f"{_ok} of {len(selected_sources)} sources retrieved")
+
+    if st.session_state.last_fetch_time:
+        st.caption(f"Last updated: {time.strftime('%H:%M:%S', time.localtime(st.session_state.last_fetch_time))}")
+
+    st.markdown("""<div style="font-size:0.68rem; color:#8a95a3; margin-top:0.3rem;">
+        © 2026 Macro-Risk Intelligence Hub · For informational purposes only.</div>""",
+        unsafe_allow_html=True)
 
 
 if st.session_state.fetched_results:
