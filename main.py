@@ -3,6 +3,7 @@ import yfinance as yf
 import feedparser
 from openai import OpenAI
 import os
+import time
 
 # ==========================================
 # 1. PAGE CONFIGURATION & UI SETUP
@@ -18,48 +19,84 @@ st.markdown("Live macro-economic data, energy commodities, and geopolitical news
 
 # Sidebar for secure API Key entry
 st.sidebar.title("⚙️ Configuration")
-st.sidebar.markdown("Enter your API key to activate the intelligence engine.")
 api_key = st.sidebar.text_input("DeepSeek API Key", type="password")
 
-# Fallback to local environment variables if available (for Streamlit Secrets)
+# Fallback: first environment variable, then Streamlit secrets (for cloud)
 if not api_key:
     api_key = os.environ.get("DEEPSEEK_API_KEY")
+if not api_key:
+    try:
+        api_key = st.secrets["DEEPSEEK_API_KEY"]
+    except:
+        pass
 
 if api_key:
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
+# Initialize session state for tracking analysis progress
+if "analysis_in_progress" not in st.session_state:
+    st.session_state.analysis_in_progress = False
+if "last_analysis_type" not in st.session_state:
+    st.session_state.last_analysis_type = None
+if "cached_market_data" not in st.session_state:
+    st.session_state.cached_market_data = None
+if "cached_news_data" not in st.session_state:
+    st.session_state.cached_news_data = None
+
+# Manual refresh button (clears cache)
+col_refresh, _ = st.sidebar.columns([1, 3])
+with col_refresh:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()
+        st.session_state.cached_market_data = None
+        st.session_state.cached_news_data = None
+        st.success("Cache cleared! Next analysis will fetch fresh data.")
+
 # ==========================================
-# 2. DATA GATHERING FUNCTIONS
+# 2. DATA GATHERING FUNCTIONS (with caching)
 # ==========================================
-@st.cache_data(ttl=3600) # Caches data for 1 hour to prevent rate-limiting
+@st.cache_data(ttl=3600, show_spinner="Fetching market data...")
 def get_market_data():
+    """Fetch current commodity prices using yfinance."""
     try:
         tickers = "CL=F NG=F HG=F ^GSPC"
         data = yf.Tickers(tickers)
-        market_summary = []
+        prices = []
         for ticker in ["CL=F", "NG=F", "HG=F", "^GSPC"]:
-            price = data.tickers[ticker].info.get("regularMarketPrice", "N/A")
-            market_summary.append(f"{ticker}: ${price}")
-        return " | ".join(market_summary)
-    except Exception:
-        return "Market data fetch failed."
+            # Use history which is more reliable than .info
+            hist = data.tickers[ticker].history(period="1d")
+            if not hist.empty:
+                price = hist['Close'].iloc[-1]
+                prices.append(f"{ticker}: ${price:.2f}")
+            else:
+                prices.append(f"{ticker}: N/A")
+        return " | ".join(prices)
+    except Exception as e:
+        st.warning(f"⚠️ Market data fetch failed: {e}. Using cached data if available.")
+        return "Market data currently unavailable"
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=600, show_spinner="Fetching latest news...")
 def get_global_news():
+    """Fetch headlines from reliable RSS feeds."""
+    # Updated feeds: Reuters Energy, OilPrice, BBC Technology (more reliable)
+    feeds = [
+        "https://www.reuters.com/arc/outboundfeeds/en-us/?outputType=xml",  # Reuters main feed
+        "https://oilprice.com/rss/main",
+        "http://feeds.bbci.co.uk/news/technology/rss.xml"
+    ]
+    headlines = []
     try:
-        feeds = [
-            "https://gcaptain.com/feed/", 
-            "https://oilprice.com/rss/main", 
-            "http://feeds.bbci.co.uk/news/technology/rss.xml"
-        ]
-        headlines = []
         for url in feeds:
             feed = feedparser.parse(url)
-            for entry in feed.entries[:2]: 
+            # If feed fails, feed.entries may be empty; we continue
+            for entry in feed.entries[:2]:
                 headlines.append(f"- {entry.title}")
+        if not headlines:
+            return "No news headlines available at this time."
         return "\n".join(headlines)
-    except Exception:
-        return "News fetch failed."
+    except Exception as e:
+        st.warning(f"⚠️ News fetch failed: {e}. Using cached data if available.")
+        return "News feed unavailable"
 
 # ==========================================
 # 3. DEEPSEEK AI ANALYSIS
@@ -92,64 +129,96 @@ def analyze_with_deepseek(prompt_type: str, market_context: str, news_context: s
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3, 
-            max_tokens=800
+            max_tokens=1500  # Increased for more detailed briefings
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Analysis failed: {e}"
+        return f"**Analysis failed:** {e}"
 
 # ==========================================
 # 4. INTERACTIVE DASHBOARD UI
 # ==========================================
 st.subheader("Select an Analysis Module:")
 
+# Disable buttons if analysis is in progress
+button_disabled = st.session_state.analysis_in_progress
+
 # Row 1 of Buttons
 col1, col2, col3, col4 = st.columns(4)
 analysis_type = None
 
 with col1:
-    if st.button("📊 Executive Macro", use_container_width=True):
+    if st.button("📊 Executive Macro", use_container_width=True, disabled=button_disabled):
         analysis_type = "general"
 with col2:
-    if st.button("🛢️ Energy & Maritime", use_container_width=True):
+    if st.button("🛢️ Energy & Maritime", use_container_width=True, disabled=button_disabled):
         analysis_type = "energy"
 with col3:
-    if st.button("🌎 LATAM/Caribbean Risk", use_container_width=True):
+    if st.button("🌎 LATAM/Caribbean Risk", use_container_width=True, disabled=button_disabled):
         analysis_type = "regional"
 with col4:
-    if st.button("⚙️ Tech & Digitalization", use_container_width=True):
+    if st.button("⚙️ Tech & Digitalization", use_container_width=True, disabled=button_disabled):
         analysis_type = "tech"
 
 # Row 2 of Buttons
 col5, col6, col7, col8 = st.columns(4)
 
 with col5:
-    if st.button("📦 Warehouse Ops", use_container_width=True):
+    if st.button("📦 Warehouse Ops", use_container_width=True, disabled=button_disabled):
         analysis_type = "warehouse"
 with col6:
-    if st.button("📋 PM Risk Assessment", use_container_width=True):
+    if st.button("📋 PM Risk Assessment", use_container_width=True, disabled=button_disabled):
         analysis_type = "pm_risk"
 with col7:
-    if st.button("🪙 Crypto & Digital Assets", use_container_width=True):
+    if st.button("🪙 Crypto & Digital Assets", use_container_width=True, disabled=button_disabled):
         analysis_type = "crypto"
 with col8:
-    if st.button("🏛️ Geopolitical Power", use_container_width=True):
+    if st.button("🏛️ Geopolitical Power", use_container_width=True, disabled=button_disabled):
         analysis_type = "power_structures"
 
 # Execute analysis when a button is clicked
-if analysis_type:
+if analysis_type and not st.session_state.analysis_in_progress:
     if not api_key:
         st.error("⚠️ Please enter your DeepSeek API Key in the sidebar to run the analysis.")
     else:
+        st.session_state.analysis_in_progress = True
+        st.session_state.last_analysis_type = analysis_type
+        
         with st.spinner("Gathering live intelligence and analyzing... ⏳"):
+            # Fetch data (cached)
             market_data = get_market_data()
             news_data = get_global_news()
+            
+            # Store in session state for later export
+            st.session_state.cached_market_data = market_data
+            st.session_state.cached_news_data = news_data
             
             # Display the raw data feed
             st.markdown("### 📡 Live Data Feed")
             st.info(f"**Commodities:** {market_data}")
             
-            # Display the AI briefing
+            # Show news headlines in an expander for transparency
+            with st.expander("📰 View Raw News Headlines"):
+                st.text(news_data)
+            
+            # Generate and display the AI briefing
             st.markdown("### 🧠 Strategic Briefing")
             report = analyze_with_deepseek(analysis_type, market_data, news_data)
-            st.write(report)
+            st.markdown(report)  # Use markdown to render bullet points
+            
+            # Add download button for the briefing
+            st.download_button(
+                label="📥 Download Briefing as Text",
+                data=report,
+                file_name=f"macro_briefing_{analysis_type}_{int(time.time())}.md",
+                mime="text/markdown"
+            )
+        
+        st.session_state.analysis_in_progress = False
+        st.rerun()  # Re-run to re-enable buttons
+
+# If analysis just completed, show a success message (optional)
+if st.session_state.get("last_analysis_type") and not st.session_state.analysis_in_progress:
+    st.success("✅ Analysis complete. You can run another module or refresh data.")
+    # Clear last type to avoid persistent message
+    st.session_state.last_analysis_type = None
