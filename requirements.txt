@@ -2,7 +2,7 @@ streamlit
 yfinance
 feedparser
 openai
-requests
-urllib3
+plotly
 pandas
-numpy
+reportlab
+Pillow
