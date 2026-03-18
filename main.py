@@ -1019,15 +1019,14 @@ You are advising an energy trading desk and a shipping logistics team. Based on 
 **LATAM & Caribbean Geopolitical Risk Assessment – 2026**
 
 **VERIFIED POLITICAL CONTEXT — USE AS GROUND TRUTH:**
-- **Trinidad & Tobago (2026):** The United National Congress (UNC) won the 2025 general election and is now the governing party. The People's National Movement (PNM) is in opposition after losing power. Analyse T&T policy, energy strategy, and business environment through the lens of a UNC-led government.
-- Do NOT reference the PNM as the governing party of T&T. Do NOT state the PNM holds a majority. This is factually incorrect for 2026.
+- **Trinidad & Tobago (2026):** A general election was held in 2025. A new government came to power with a slim majority. Do NOT reference or name any specific political party as governing or in opposition — party names are omitted intentionally. Analyse T&T solely through its policy outlook, energy sector priorities, and economic implications.
 
 Focus on Trinidad & Tobago, the wider Caribbean, and key Latin American economies (Brazil, Mexico, Argentina, Venezuela, Colombia). Your analysis must address:
 
-- **Political Stability & Governance**: For T&T, analyse the UNC government's likely policy priorities (energy sector, cost of living, foreign investment, crime). For other countries, note recent elections, protests, or policy shifts that could impact business operations. Flag where political data is uncertain.
+- **Political Stability & Governance**: For T&T, analyse the new government's likely policy priorities (energy sector, cost of living, foreign investment, crime). For other countries, note recent elections, protests, or policy shifts that could impact business operations. Flag where political data is uncertain.
 - **Economic Vulnerability**: Currency volatility, inflation, debt levels, and reliance on commodity exports.
 - **Shipping & Trade Chokepoints**: Assess risks to maritime routes (Panama Canal, Caribbean passages, Amazon River ports).
-- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals under UNC governance), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness).
+- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals — note new government in place since 2025), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness).
 - **Social & Environmental Factors**: Climate change impacts (hurricanes, droughts), migration flows.
 - **Risk Scenarios**: Develop two plausible scenarios for the region over the next 12 months and their implications.
 - **Recommendations**: Contingency plans, diversification strategies, or partnerships to prioritize.
