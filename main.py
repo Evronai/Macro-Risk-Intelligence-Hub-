@@ -980,7 +980,13 @@ def analyze_with_deepseek(prompt_type: str, market_context: str, news_context: s
         "geopolitics, energy logistics, supply chain management, and financial markets. "
         "**IMPORTANT: The current date is 2026.** All analysis must be forward-looking, "
         "actionable, and grounded in the provided data. Use structured markdown with clear "
-        "headings, bullet points, and where appropriate, tables. Be concise but comprehensive."
+        "headings, bullet points, and where appropriate, tables. Be concise but comprehensive. "
+        "**CRITICAL — POLITICAL FACTS:** Your training data has a knowledge cutoff and WILL contain "
+        "outdated or incorrect political information. Do NOT state specific electoral outcomes, "
+        "ruling parties, or heads of government from memory unless they are explicitly stated in "
+        "the data provided to you. Where political context is provided in the prompt, treat it as "
+        "ground truth and use it as the basis for your analysis. If no current political data is "
+        "provided for a country, acknowledge uncertainty rather than asserting stale facts."
     )
 
     prompts = {
@@ -1012,12 +1018,16 @@ You are advising an energy trading desk and a shipping logistics team. Based on 
         'regional': """
 **LATAM & Caribbean Geopolitical Risk Assessment – 2026**
 
+**VERIFIED POLITICAL CONTEXT — USE AS GROUND TRUTH:**
+- **Trinidad & Tobago (2026):** The United National Congress (UNC) won the 2025 general election and is now the governing party. The People's National Movement (PNM) is in opposition after losing power. Analyse T&T policy, energy strategy, and business environment through the lens of a UNC-led government.
+- Do NOT reference the PNM as the governing party of T&T. Do NOT state the PNM holds a majority. This is factually incorrect for 2026.
+
 Focus on Trinidad & Tobago, the wider Caribbean, and key Latin American economies (Brazil, Mexico, Argentina, Venezuela, Colombia). Your analysis must address:
 
-- **Political Stability & Governance**: Recent elections, protests, or policy shifts that could impact business operations.
+- **Political Stability & Governance**: For T&T, analyse the UNC government's likely policy priorities (energy sector, cost of living, foreign investment, crime). For other countries, note recent elections, protests, or policy shifts that could impact business operations. Flag where political data is uncertain.
 - **Economic Vulnerability**: Currency volatility, inflation, debt levels, and reliance on commodity exports.
 - **Shipping & Trade Chokepoints**: Assess risks to maritime routes (Panama Canal, Caribbean passages, Amazon River ports).
-- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness).
+- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals under UNC governance), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness).
 - **Social & Environmental Factors**: Climate change impacts (hurricanes, droughts), migration flows.
 - **Risk Scenarios**: Develop two plausible scenarios for the region over the next 12 months and their implications.
 - **Recommendations**: Contingency plans, diversification strategies, or partnerships to prioritize.
