@@ -1351,62 +1351,275 @@ if st.session_state.fetched_results:
     # ── Category Tabs ──
     st.markdown("## Data by Category")
 
-    tab_labels = ["Energy", "Metals", "Agriculture", "Economic", "Monetary",
-                  "Currency", "Equities", "Crypto", "News", "Geopolitical"]
-    tabs = st.tabs(tab_labels)
+    # Category metadata: icon, description, display mode
+    CATEGORY_META = {
+        "Energy":       {"icon": "⚡", "desc": "Crude, gas, refined products & renewables", "mode": "cards"},
+        "Metals":       {"icon": "🪙", "desc": "Precious & industrial metals",              "mode": "cards"},
+        "Agriculture":  {"icon": "🌾", "desc": "Grains, softs & livestock",                 "mode": "cards"},
+        "Economic":     {"icon": "📈", "desc": "GDP, inflation, employment indicators",      "mode": "kv"},
+        "Monetary":     {"icon": "🏦", "desc": "Central bank rates & treasury yields",       "mode": "cards"},
+        "Currency":     {"icon": "💱", "desc": "Major FX pairs & dollar index",              "mode": "cards"},
+        "Equities":     {"icon": "📊", "desc": "Equity indices & volatility",               "mode": "cards"},
+        "Crypto":       {"icon": "₿",  "desc": "Digital asset prices",                      "mode": "cards"},
+        "News":         {"icon": "📰", "desc": "Real-time headlines from global sources",   "mode": "news"},
+        "Geopolitical": {"icon": "🌐", "desc": "Risk indices, conflict & climate data",     "mode": "kv"},
+    }
+
+    tab_labels = list(CATEGORY_META.keys())
+    tab_display = [f"{CATEGORY_META[c]['icon']} {c}" for c in tab_labels]
+    tabs = st.tabs(tab_display)
+
+    def _change_color(change_str):
+        """Return CSS color for a change string."""
+        try:
+            val = float(change_str.replace(",", ""))
+            if val > 0:
+                return "#1a7a4a"
+            elif val < 0:
+                return "#c0392b"
+        except Exception:
+            pass
+        return "#8a95a3"
+
+    def _change_arrow(change_str):
+        try:
+            val = float(change_str.replace(",", ""))
+            if val > 0:
+                return "▲"
+            elif val < 0:
+                return "▼"
+        except Exception:
+            pass
+        return "–"
 
     for tab, category in zip(tabs, tab_labels):
+        meta = CATEGORY_META[category]
         with tab:
-            df = format_results_for_category(results, category)
-            if not df.empty:
-                # Colour the Change and Status columns
-                def style_change(val):
-                    if isinstance(val, str) and val.startswith('+'):
-                        return 'color: #1a7a4a; font-weight:600'
-                    elif isinstance(val, str) and val.startswith('-'):
-                        return 'color: #c0392b; font-weight:600'
-                    return ''
+            # Tab sub-header
+            st.markdown(
+                f"<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.78rem; "
+                f"color:#8a95a3; margin-bottom:1.2rem; padding-bottom:0.6rem; "
+                f"border-bottom:1px solid #e2e6ed;'>"
+                f"<span style='font-weight:600; color:#1a2340;'>{meta['icon']} {category}</span>"
+                f"&nbsp;·&nbsp;{meta['desc']}</div>",
+                unsafe_allow_html=True
+            )
 
-                def style_status(val):
-                    if val == "Error":
-                        return 'color: #c0392b'
-                    elif val == "Live":
-                        return 'color: #1a7a4a; font-weight:500'
-                    return 'color: #8a95a3'
+            # ── CARD MODE (price data) ──
+            if meta["mode"] == "cards":
+                price_items = [
+                    (name, data) for name, data in results.items()
+                    if isinstance(data, dict) and "price" in data
+                    and any(s["name"] == name and s["category"] == category for s in ALL_SOURCES)
+                ]
+                error_items = [
+                    (name, data) for name, data in results.items()
+                    if isinstance(data, dict) and "error" in data
+                    and any(s["name"] == name and s["category"] == category for s in ALL_SOURCES)
+                ]
 
-                styled_df = (
-                    df.style
-                    .applymap(style_change, subset=['Change'])
-                    .applymap(style_status, subset=['Status'])
-                )
-                st.dataframe(styled_df, use_container_width=True, height=300)
+                if price_items:
+                    # Render as a tight card grid — 4 per row
+                    cols_per_row = 4
+                    for row_start in range(0, len(price_items), cols_per_row):
+                        row_items = price_items[row_start:row_start + cols_per_row]
+                        cols = st.columns(cols_per_row)
+                        for col, (name, data) in zip(cols, row_items):
+                            price = data["price"]
+                            change = data.get("change", 0)
+                            change_str = f"{change:+.2f}"
+                            color = _change_color(str(change))
+                            arrow = _change_arrow(str(change))
+                            pct = (change / (price - change) * 100) if (price - change) != 0 else 0
+                            with col:
+                                st.markdown(f"""
+                                <div style="background:#ffffff; border:1px solid #e2e6ed;
+                                            border-left:3px solid #1a2340; border-radius:3px;
+                                            padding:0.9rem 1rem; margin-bottom:0.8rem;
+                                            box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                                    <div style="font-family:'Source Sans 3',sans-serif;
+                                                font-size:0.65rem; font-weight:600; letter-spacing:0.12em;
+                                                text-transform:uppercase; color:#8a95a3;
+                                                margin-bottom:0.35rem; white-space:nowrap;
+                                                overflow:hidden; text-overflow:ellipsis;"
+                                         title="{name}">{name}</div>
+                                    <div style="font-family:'Source Code Pro',monospace;
+                                                font-size:1.25rem; font-weight:500; color:#0f1923;
+                                                line-height:1.1; margin-bottom:0.3rem;">
+                                        ${price:,.2f}
+                                    </div>
+                                    <div style="font-family:'Source Code Pro',monospace;
+                                                font-size:0.78rem; font-weight:600; color:{color};">
+                                        {arrow} {change_str} &nbsp;
+                                        <span style="font-weight:400; font-size:0.72rem;">
+                                            ({pct:+.2f}%)
+                                        </span>
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
 
-                # News headlines expanded view
-                if category == "News":
+                if error_items:
+                    with st.expander(f"⚠️ {len(error_items)} source(s) unavailable", expanded=False):
+                        for name, data in error_items:
+                            st.markdown(
+                                f"<div style='font-size:0.78rem; color:#c0392b; padding:0.2rem 0; "
+                                f"font-family:\"Source Code Pro\",monospace;'>"
+                                f"<b>{name}</b>: {data.get('error','Unknown error')}</div>",
+                                unsafe_allow_html=True
+                            )
+
+                if not price_items and not error_items:
+                    st.markdown(
+                        "<div style='color:#8a95a3; font-size:0.82rem; padding:1.5rem 0; text-align:center;'>"
+                        "No data available. Select these sources in the sidebar and fetch.</div>",
+                        unsafe_allow_html=True
+                    )
+
+            # ── KEY-VALUE MODE (economic / geopolitical indicators) ──
+            elif meta["mode"] == "kv":
+                kv_items = []
+                for name, data in results.items():
+                    src = next((s for s in ALL_SOURCES if s["name"] == name), None)
+                    if not src or src["category"] != category:
+                        continue
+                    if "error" in data:
+                        kv_items.append((name, "—", data["error"], "error"))
+                    elif "price" in data:
+                        change_str = f"{data.get('change', 0):+.2f}"
+                        kv_items.append((name, f"${data['price']:,.2f}", change_str, "price"))
+                    elif "value" in data:
+                        kv_items.append((name, data["value"], data.get("date", ""), "value"))
+                    elif "note" in data:
+                        kv_items.append((name, "—", data["note"], "note"))
+                    elif "data" in data:
+                        kv_items.append((name, "API data received", "", "api"))
+
+                if kv_items:
+                    # Render as a clean two-column table
+                    st.markdown("""
+                    <table style="width:100%; border-collapse:collapse;
+                                  font-family:'Source Sans 3',sans-serif; font-size:0.83rem;">
+                        <thead>
+                            <tr style="background:#1a2340;">
+                                <th style="padding:0.55rem 1rem; text-align:left; color:#ffffff;
+                                           font-size:0.68rem; letter-spacing:0.12em; font-weight:600;
+                                           text-transform:uppercase; width:40%;">Indicator</th>
+                                <th style="padding:0.55rem 1rem; text-align:right; color:#ffffff;
+                                           font-size:0.68rem; letter-spacing:0.12em; font-weight:600;
+                                           text-transform:uppercase; width:25%;">Latest Value</th>
+                                <th style="padding:0.55rem 1rem; text-align:left; color:#ffffff;
+                                           font-size:0.68rem; letter-spacing:0.12em; font-weight:600;
+                                           text-transform:uppercase; width:35%;">Note / Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    """ + "".join([
+                        f"""<tr style="background:{'#f5f7fb' if i % 2 == 0 else '#ffffff'};
+                                      border-bottom:1px solid #e2e6ed;">
+                            <td style="padding:0.55rem 1rem; color:#0f1923; font-weight:500;">{name}</td>
+                            <td style="padding:0.55rem 1rem; text-align:right;
+                                       font-family:'Source Code Pro',monospace; font-size:0.82rem;
+                                       color:{'#c0392b' if kind == 'error' else '#1a2340'};
+                                       font-weight:600;">{value}</td>
+                            <td style="padding:0.55rem 1rem;
+                                       font-size:0.75rem; color:#8a95a3;">{note}</td>
+                        </tr>"""
+                        for i, (name, value, note, kind) in enumerate(kv_items)
+                    ]) + """
+                        </tbody>
+                    </table>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(
+                        "<div style='color:#8a95a3; font-size:0.82rem; padding:1.5rem 0; text-align:center;'>"
+                        "No data available. Select these sources in the sidebar and fetch.</div>",
+                        unsafe_allow_html=True
+                    )
+
+            # ── NEWS MODE ──
+            elif meta["mode"] == "news":
+                news_sources = [
+                    (name, data) for name, data in results.items()
+                    if isinstance(data, dict) and "headlines" in data
+                    and any(s["name"] == name and s["category"] == "News" for s in ALL_SOURCES)
+                ]
+                error_news = [
+                    (name, data) for name, data in results.items()
+                    if isinstance(data, dict) and "error" in data
+                    and any(s["name"] == name and s["category"] == "News" for s in ALL_SOURCES)
+                ]
+
+                if news_sources:
+                    # Summary row
+                    total_headlines = sum(len(d["headlines"]) for _, d in news_sources)
+                    st.markdown(
+                        f"<div style='font-size:0.78rem; color:#4a5568; margin-bottom:1rem; "
+                        f"font-family:\"Source Sans 3\",sans-serif;'>"
+                        f"<b style='color:#1a2340;'>{total_headlines}</b> headlines from "
+                        f"<b style='color:#1a2340;'>{len(news_sources)}</b> sources</div>",
+                        unsafe_allow_html=True
+                    )
+
+                    for src_name, data in news_sources:
+                        headlines = data.get("headlines", [])
+                        if not headlines:
+                            continue
+
+                        # Source header
+                        st.markdown(f"""
+                        <div style="background:#1a2340; padding:0.5rem 1rem;
+                                    border-radius:3px 3px 0 0; margin-top:0.8rem;">
+                            <span style="font-family:'Source Sans 3',sans-serif; font-size:0.72rem;
+                                         font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+                                         color:#b8c4d8;">{src_name}</span>
+                            <span style="float:right; font-size:0.68rem; color:#7a8ba8;">
+                                {len(headlines)} articles
+                            </span>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        # Headlines list
+                        rows_html = ""
+                        for idx, hl in enumerate(headlines):
+                            bg = "#ffffff" if idx % 2 == 0 else "#f5f7fb"
+                            rows_html += f"""
+                            <div style="background:{bg}; padding:0.65rem 1rem;
+                                        border-bottom:1px solid #e2e6ed;
+                                        border-left:1px solid #e2e6ed;
+                                        border-right:1px solid #e2e6ed;">
+                                <a href="{hl['link']}" target="_blank"
+                                   style="font-family:'Source Sans 3',sans-serif; font-size:0.84rem;
+                                          font-weight:500; color:#003087; text-decoration:none;
+                                          line-height:1.4; display:block;">
+                                    {hl['title']}
+                                </a>
+                                <div style="font-size:0.7rem; color:#8a95a3; margin-top:0.2rem;
+                                            font-family:'Source Sans 3',sans-serif;">
+                                    {hl.get('published', '')}
+                                </div>
+                            </div>"""
+
+                        # Close with bottom border radius
+                        rows_html += "<div style='border-bottom:1px solid #e2e6ed; border-left:1px solid #e2e6ed; border-right:1px solid #e2e6ed; border-radius:0 0 3px 3px; height:4px; background:#ffffff;'></div>"
+                        st.markdown(rows_html, unsafe_allow_html=True)
+
+                if error_news:
                     st.markdown("<br>", unsafe_allow_html=True)
-                    st.markdown("#### Recent Headlines")
-                    for src_name, data in results.items():
-                        src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
-                        if src and src["category"] == "News" and "headlines" in data:
-                            with st.expander(f"**{src_name}**", expanded=False):
-                                for hl in data["headlines"]:
-                                    st.markdown(
-                                        f"<div style='font-size:0.83rem; padding:0.4rem 0; "
-                                        f"border-bottom:1px solid #e2e6ed; font-family:\"Source Sans 3\",sans-serif;'>"
-                                        f"<a href='{hl['link']}' target='_blank' "
-                                        f"style='color:#003087; text-decoration:none; font-weight:500;'>"
-                                        f"{hl['title']}</a>"
-                                        f"<span style='color:#8a95a3; font-size:0.72rem; margin-left:0.8rem;'>"
-                                        f"{hl['published']}</span></div>",
-                                        unsafe_allow_html=True
-                                    )
-            else:
-                st.markdown(
-                    "<div style='color:#8a95a3; font-size:0.82rem; padding:1rem 0;'>"
-                    "No data available in this category. Select relevant sources in the sidebar and fetch."
-                    "</div>",
-                    unsafe_allow_html=True
-                )
+                    with st.expander(f"⚠️ {len(error_news)} news source(s) unavailable", expanded=False):
+                        for name, data in error_news:
+                            st.markdown(
+                                f"<div style='font-size:0.78rem; color:#c0392b; padding:0.2rem 0; "
+                                f"font-family:\"Source Code Pro\",monospace;'>"
+                                f"<b>{name}</b>: {data.get('error','Unknown error')}</div>",
+                                unsafe_allow_html=True
+                            )
+
+                if not news_sources and not error_news:
+                    st.markdown(
+                        "<div style='color:#8a95a3; font-size:0.82rem; padding:1.5rem 0; text-align:center;'>"
+                        "No news sources fetched. Select news sources in the sidebar and fetch.</div>",
+                        unsafe_allow_html=True
+                    )
 
     # ── AI Analysis ──
     st.divider()
