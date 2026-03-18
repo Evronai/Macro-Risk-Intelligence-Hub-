@@ -569,7 +569,7 @@ ALL_SOURCES = [
     {"name": "US Unemployment Rate", "type": "fred", "series_id": "UNRATE", "category": "Economic"},
     {"name": "US CPI", "type": "fred", "series_id": "CPIAUCSL", "category": "Economic"},
     {"name": "US PPI", "type": "fred", "series_id": "PPIACO", "category": "Economic"},
-    {"name": "US Fed Funds Rate", "type": "fred", "series_id": "FEDFUNDS", "category": "Monetary"},
+    {"name": "US Fed Funds Rate", "type": "yfinance", "symbol": "^IRX", "category": "Monetary"},
     {"name": "US 10-Year Treasury", "type": "yfinance", "symbol": "^TNX", "category": "Monetary"},
     {"name": "US 2-Year Treasury", "type": "yfinance", "symbol": "^IRX", "category": "Monetary"},
     {"name": "US Dollar Index", "type": "yfinance", "symbol": "DX-Y.NYB", "category": "Currency"},
@@ -587,7 +587,7 @@ ALL_SOURCES = [
     {"name": "Eurozone GDP", "type": "tradingeconomics", "country": "eurozone", "indicator": "gdp", "category": "Economic"},
     {"name": "Japan CPI", "type": "tradingeconomics", "country": "japan", "indicator": "cpi", "category": "Economic"},
     {"name": "UK Unemployment", "type": "tradingeconomics", "country": "united-kingdom", "indicator": "unemployment-rate", "category": "Economic"},
-    {"name": "Brazil Interest Rate", "type": "tradingeconomics", "country": "brazil", "indicator": "interest-rate", "category": "Monetary"},
+    {"name": "Brazil Interest Rate (EWZ)", "type": "yfinance", "symbol": "EWZ", "category": "Monetary"},
     {"name": "India GDP", "type": "tradingeconomics", "country": "india", "indicator": "gdp", "category": "Economic"},
     {"name": "Australia CPI", "type": "tradingeconomics", "country": "australia", "indicator": "cpi", "category": "Economic"},
 
