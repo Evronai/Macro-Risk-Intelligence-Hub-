@@ -106,7 +106,17 @@ st.markdown("""
     [data-testid="stSidebar"] > div {
         padding-top: 0 !important;
     }
-    /* Hide the default Streamlit sidebar header that duplicates the title — desktop only */
+
+    /* Sidebar text styling — use specific selectors, NOT wildcard * */
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span:not([data-baseweb="tag"] span),
+    [data-testid="stSidebar"] div.stMarkdown,
+    [data-testid="stSidebar"] .stCaption {
+        font-family: var(--font-body) !important;
+        color: var(--text-sidebar) !important;
+    }
+
+    /* Hide duplicate title on desktop only */
     @media (min-width: 769px) {
         [data-testid="stSidebarHeader"] {
             display: none !important;
@@ -115,10 +125,45 @@ st.markdown("""
             display: none !important;
         }
     }
-    [data-testid="stSidebar"] * {
-        font-family: var(--font-body) !important;
-        color: var(--text-sidebar) !important;
+
+    /* ── Mobile sidebar toggle button (hamburger) ── */
+    /* Streamlit puts the open-sidebar button in the top toolbar */
+    @media (max-width: 768px) {
+        /* Ensure the toolbar that contains the hamburger is visible */
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        header[data-testid="stHeader"] {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: all !important;
+        }
+        /* The actual sidebar toggle/collapse button */
+        [data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarNavItems"],
+        button[kind="header"],
+        [data-testid="collapsedControl"] {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: all !important;
+            color: var(--accent-navy) !important;
+            z-index: 9999 !important;
+        }
+        /* Sidebar itself — slide-over on mobile */
+        [data-testid="stSidebar"] {
+            min-width: 280px !important;
+            max-width: 88vw !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            z-index: 9998 !important;
+        }
+        [data-testid="stSidebar"] > div:first-child {
+            overflow-y: auto !important;
+            padding-bottom: 4rem !important;
+        }
     }
+
     [data-testid="stSidebar"] .stMarkdown h2 {
         font-family: var(--font-body) !important;
         font-weight: 600 !important;
@@ -177,7 +222,6 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton button:hover {
         background-color: #1d4494 !important;
     }
-
     /* ── Main Headings ── */
     h1 {
         font-family: var(--font-display) !important;
@@ -712,43 +756,6 @@ st.markdown("""
             padding: 0.35rem 0.5rem !important;
             white-space: normal !important;
             word-break: break-word;
-        }
-
-        /* Sidebar — restore toggle button on mobile so it can be opened */
-        [data-testid="stSidebarCollapseButton"] {
-            display: flex !important;
-            background-color: var(--accent-navy) !important;
-            border: 1px solid rgba(255,255,255,0.15) !important;
-            border-radius: 4px !important;
-            color: #ffffff !important;
-        }
-        [data-testid="stSidebarCollapseButton"] svg {
-            fill: #ffffff !important;
-            color: #ffffff !important;
-        }
-        [data-testid="stSidebarHeader"] {
-            display: flex !important;
-            background-color: var(--accent-navy) !important;
-            padding: 0.5rem 0.75rem !important;
-            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-        }
-        /* Sidebar slides in full-width-ish on mobile */
-        [data-testid="stSidebar"] {
-            min-width: 280px !important;
-            max-width: 88vw !important;
-            overflow-y: auto !important;
-            -webkit-overflow-scrolling: touch !important;
-        }
-        /* Sidebar inner content scrollable */
-        [data-testid="stSidebar"] > div:first-child {
-            overflow-y: auto !important;
-            height: 100vh !important;
-            padding-bottom: 3rem !important;
-        }
-        /* Sidebar multiselect tags wrap properly on narrow width */
-        [data-testid="stSidebar"] [data-baseweb="tag"] {
-            max-width: 180px !important;
-            overflow: hidden !important;
         }
 
         /* Empty state card */
