@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. SOURCE REGISTRY (100+ FREE SOURCES)
+# 2. SOURCE REGISTRY (90+ FREE SOURCES)
 # ==========================================
 ALL_SOURCES = [
     # ----- COMMODITIES & ENERGY (20 sources) -----
@@ -253,6 +253,7 @@ if "analysis_in_progress" not in st.session_state:
 with st.sidebar:
     st.title("⚙️ Configuration")
     
+    # API Key input (DeepSeek)
     api_key = st.text_input("DeepSeek API Key", type="password")
     if not api_key:
         api_key = os.environ.get("DEEPSEEK_API_KEY")
@@ -269,6 +270,7 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # Source selection
     st.subheader("📡 Data Sources")
     categories = list(set(s["category"] for s in ALL_SOURCES))
     selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
@@ -297,66 +299,100 @@ with st.sidebar:
     st.caption("© 2026 Macro-Risk Intelligence")
 
 # ==========================================
-# 6. MAIN DASHBOARD UI
+# 6. PROFESSIONAL DASHBOARD UI
 # ==========================================
+
 st.title("🌍 Macro-Risk Intelligence Hub")
-st.markdown("Real‑time economic, energy & geopolitical risk monitoring with 100+ sources")
+st.markdown("#### Real‑time monitoring of economic, energy & geopolitical risks")
+st.caption(f"Data updated live • Session started: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 if st.session_state.fetched_results:
     results = st.session_state.fetched_results
-    
+
+    # 1. Key Metrics Row
+    st.subheader("📊 Key Market Snapshot")
+    price_sources = [(name, data) for name, data in results.items()
+                     if isinstance(data, dict) and "price" in data]
+
+    if price_sources:
+        metric_cols = st.columns(4)
+        for i, (name, data) in enumerate(price_sources[:4]):
+            with metric_cols[i]:
+                st.metric(
+                    label=name,
+                    value=f"${data['price']:,.2f}",
+                    delta=f"{data.get('change', 0):+.2f}",
+                    delta_color="normal"
+                )
+
+        if len(price_sources) > 4:
+            metric_cols2 = st.columns(4)
+            for i, (name, data) in enumerate(price_sources[4:8]):
+                with metric_cols2[i]:
+                    st.metric(
+                        label=name,
+                        value=f"${data['price']:,.2f}",
+                        delta=f"{data.get('change', 0):+.2f}",
+                        delta_color="normal"
+                    )
+    else:
+        st.info("Select commodity sources in the sidebar to see price snapshots.")
+
+    st.divider()
+
+    # 2. Categorized Data Expanders
+    st.subheader("📂 Detailed Source Data")
+
     categories_in_results = {}
     for src_name, data in results.items():
         src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
         cat = src["category"] if src else "Other"
         categories_in_results.setdefault(cat, []).append((src_name, data))
-    
-    st.subheader("📊 Key Commodity Prices")
-    price_sources = [(name, data) for name, data in results.items() 
-                     if isinstance(data, dict) and "price" in data]
-    if price_sources:
-        cols = st.columns(min(4, len(price_sources)))
-        for i, (name, data) in enumerate(price_sources[:4]):
-            with cols[i]:
-                st.metric(
-                    label=name,
-                    value=f"${data['price']}",
-                    delta=f"{data.get('change', 0):+.2f}"
-                )
-    else:
-        st.info("No price data in current selection")
-    
-    for cat, items in categories_in_results.items():
-        with st.expander(f"📁 {cat} Sources ({len(items)})", expanded=cat in ["Energy", "Economic"]):
-            cols = st.columns(3)
-            for i, (name, data) in enumerate(items):
-                with cols[i % 3]:
-                    st.markdown(f"**{name}**")
-                    if "error" in data:
-                        st.error(f"❌ {data['error']}")
-                    elif "price" in data:
-                        st.metric("Price", f"${data['price']}", delta=f"{data.get('change',0):+.2f}")
-                    elif "headlines" in data:
-                        for hl in data["headlines"][:2]:
-                            st.markdown(f"- {hl['title'][:60]}...")
-                    elif "value" in data:
-                        st.write(f"Value: {data['value']} ({data.get('date', '')})")
-                    elif "data" in data:
-                        preview = str(data["data"])[:100] + "..."
-                        st.text(preview)
-                    else:
-                        st.write("Data available")
-    
-    st.markdown("---")
-    st.subheader("🧠 AI Analysis")
-    
+
+    category_order = ["Energy", "Metals", "Agriculture", "Economic", "Monetary", "Currency", "Equities", "Crypto", "News", "Geopolitical", "Other"]
+
+    for cat in category_order:
+        if cat in categories_in_results:
+            items = categories_in_results[cat]
+            with st.expander(f"**{cat}** ({len(items)} sources)", expanded=cat in ["Energy", "Economic"]):
+                cols = st.columns(3)
+                for idx, (name, data) in enumerate(items):
+                    with cols[idx % 3]:
+                        with st.container(border=True):
+                            st.caption(name)
+                            if "error" in data:
+                                st.error(f"❌ {data['error']}")
+                            elif "price" in data:
+                                st.metric("Price", f"${data['price']}", delta=f"{data.get('change',0):+.2f}")
+                            elif "headlines" in data:
+                                for hl in data["headlines"][:2]:
+                                    st.markdown(f"- {hl['title'][:60]}...")
+                                if len(data["headlines"]) > 2:
+                                    st.markdown(f"*+{len(data['headlines'])-2} more*")
+                            elif "value" in data:
+                                st.write(f"**Value:** {data['value']}")
+                                st.caption(f"as of {data.get('date', 'N/A')}")
+                            elif "data" in data:
+                                st.write("Data available")
+                                with st.popover("Preview"):
+                                    st.json(data["data"])
+                            else:
+                                st.write("✓ Data received")
+
+    st.divider()
+
+    # 3. AI Analysis Section
+    st.subheader("🧠 AI-Powered Strategic Analysis")
+    st.markdown("Select a focus area to generate a forward-looking briefing based on **current 2026 data**.")
+
     analysis_type = st.selectbox(
-        "Select analysis focus",
-        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk", 
-         "Tech & Digitalization", "Warehouse Ops", "PM Risk", 
-         "Crypto", "Geopolitical Power"]
+        "Choose analysis lens:",
+        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
+         "Tech & Digitalization", "Warehouse Ops", "PM Risk",
+         "Crypto", "Geopolitical Power"],
+        key="analysis_selector"
     )
-    
+
     prompt_map = {
         "General Macro": "general",
         "Energy & Maritime": "energy",
@@ -367,80 +403,219 @@ if st.session_state.fetched_results:
         "Crypto": "crypto",
         "Geopolitical Power": "power_structures"
     }
-    
-    if st.button("Generate Analysis", disabled=st.session_state.analysis_in_progress):
+
+    if st.button("🚀 Generate Briefing", type="primary", use_container_width=True):
         if not api_key:
-            st.error("DeepSeek API key required")
+            st.error("⚠️ DeepSeek API key required. Please add it in the sidebar.")
         elif not st.session_state.fetched_results:
-            st.warning("Please fetch sources first")
+            st.warning("Please fetch data sources first.")
         else:
             st.session_state.analysis_in_progress = True
-            
-            with st.status("Running analysis...", expanded=True) as status:
-                st.write("📊 Preparing data...")
+
+            with st.status("🔄 Generating comprehensive briefing...", expanded=True) as status:
+                st.write("📊 Compiling market data...")
                 market_lines = []
                 news_lines = []
                 for name, data in results.items():
                     if "error" in data:
                         continue
                     if "price" in data:
-                        market_lines.append(f"{name}: ${data['price']} ({data.get('change',0):+.2f})")
+                        market_lines.append(f"- {name}: ${data['price']} (change: {data.get('change',0):+.2f})")
                     elif "headlines" in data:
                         for hl in data["headlines"][:2]:
                             news_lines.append(f"- {hl['title']}")
                     elif "value" in data:
-                        market_lines.append(f"{name}: {data['value']} ({data.get('date','')})")
-                
-                market_context = "\n".join(market_lines[:20])
-                news_context = "\n".join(news_lines[:10])
-                
-                st.write("🧠 Calling DeepSeek API...")
-                client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-                
-                system_prompt = (
-                    "You are an elite Macro-Risk Analyst with over 10 years of combined experience. "
-                    "Keep your briefing highly actionable, concise, and structured in markdown bullet points."
-                )
-                
-                prompts = {
-                    "general": "Provide an executive macro-economic and supply chain briefing. Highlight immediate red flags.",
-                    "energy": "Analyze energy commodities, oil/gas pricing impacts, and downstream maritime/shipping logistics.",
-                    "regional": "Analyze geopolitical stability, shipping chokepoints, and economic risk specifically impacting the Caribbean and LATAM.",
-                    "tech": "Analyze macro trends in IT services, automation, and digitalization. How might these events force operational shifts?",
-                    "warehouse": "Analyze from the perspective of a Warehouse Manager. Focus on procurement lead times, inventory holding costs, and facility resource allocation.",
-                    "pm_risk": "Act as a Senior Project Manager. Identify potential scope, schedule, and cost risks for heavy-industry projects. Suggest mitigation.",
-                    "crypto": "Analyze impact on digital assets and crypto markets. How do commodity shifts and geopolitical news influence decentralized finance?",
-                    "power_structures": "Provide an advanced geopolitical analysis focusing on global power structures, central authority shifts, economic warfare."
-                }
-                
-                user_prompt = f"Market Data:\n{market_context}\n\nLatest Intelligence:\n{news_context}\n\nTask: {prompts.get(prompt_map[analysis_type], prompts['general'])}"
-                
-                try:
-                    response = client.chat.completions.create(
-                        model="deepseek-chat",
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        temperature=0.3,
-                        max_tokens=1500
-                    )
-                    report = response.choices[0].message.content
-                except Exception as e:
-                    report = f"**Analysis failed:** {e}"
-                
-                status.update(label="✅ Analysis complete", state="complete")
-            
-            st.markdown("### 🧠 Strategic Briefing")
-            st.markdown(report)
-            
+                        market_lines.append(f"- {name}: {data['value']} (as of {data.get('date','N/A')})")
+
+                market_context = "\n".join(market_lines[:25])
+                news_context = "\n".join(news_lines[:12])
+
+                st.write("🧠 Calling DeepSeek API for 2026 analysis...")
+                report = analyze_with_deepseek(prompt_map[analysis_type], market_context, news_context, api_key)
+                status.update(label="✅ Briefing ready", state="complete")
+
+            with st.container(border=True):
+                st.markdown("### Strategic Briefing for 2026")
+                st.markdown(report)
+
             st.download_button(
-                label="📥 Download Briefing",
+                label="📥 Download Briefing (Markdown)",
                 data=report,
-                file_name=f"briefing_{int(time.time())}.md",
-                mime="text/markdown"
+                file_name=f"macro_briefing_{int(time.time())}.md",
+                mime="text/markdown",
+                use_container_width=True
             )
-            
+
             st.session_state.analysis_in_progress = False
+
 else:
-    st.info("👈 Select sources in the sidebar and click 'Fetch Selected Sources' to begin.")
+    st.info("👈 **Start here:** Select data sources in the sidebar and click 'Fetch Selected Sources' to populate the dashboard.")
+    with st.container(border=True):
+        st.markdown("**Dashboard Preview**")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1: st.metric("Crude Oil", "$--.--", "--")
+        with col2: st.metric("Gold", "$--.--", "--")
+        with col3: st.metric("S&P 500", "--.--", "--")
+        with col4: st.metric("VIX", "--.--", "--")
+        st.caption("Select and fetch sources to see live data.")
+
+# ==========================================
+# 7. EXPANDED AI PROMPTS FUNCTION
+# ==========================================
+def analyze_with_deepseek(prompt_type: str, market_context: str, news_context: str, api_key: str) -> str:
+    """
+    Generate a strategic briefing using DeepSeek, with expanded prompts.
+    """
+    system_prompt = (
+        "You are an elite Macro-Risk Analyst with over 15 years of combined experience in "
+        "geopolitics, energy logistics, supply chain management, and financial markets. "
+        "**IMPORTANT: The current date is 2026.** All analysis must be forward-looking, "
+        "actionable, and grounded in the provided data. Use structured markdown with clear "
+        "headings, bullet points, and where appropriate, tables. Be concise but comprehensive."
+    )
+
+    prompts = {
+        'general': """
+**Executive Macro-Economic & Supply Chain Briefing – 2026**
+
+Analyze the provided market and news data to produce a high-level briefing for C-suite executives. Your response must include:
+
+- **Global Economic Snapshot**: Key trends in growth, inflation, and monetary policy across major economies (US, Eurozone, China). Highlight divergences and potential spillovers.
+- **Supply Chain Red Flags**: Immediate bottlenecks, port congestion, raw material shortages, or logistics disruptions. Quantify impacts where possible (e.g., "Copper prices up X% indicating...").
+- **Energy & Commodity Outlook**: Critical price movements and their drivers (geopolitical, weather, demand shifts). Focus on oil, natural gas, and key industrial metals.
+- **Risk Heatmap**: A bulleted list of top 5 macro risks for the next 6–12 months, each with a brief explanation and potential business impact.
+- **Strategic Recommendations**: 3–4 actionable steps for multinational corporations to mitigate identified risks and seize opportunities.
+
+Use a professional, decisive tone. Avoid generic statements; base insights strictly on the data provided.
+""",
+        'energy': """
+**Energy & Maritime Analysis – 2026**
+
+You are advising an energy trading desk and a shipping logistics team. Based on the data, deliver a detailed briefing covering:
+
+- **Crude Oil & Natural Gas Price Drivers**: Analyze supply-side factors (OPEC+ decisions, US shale activity, Russian exports) and demand-side trends (global economic activity, weather, energy transition). Include price forecasts or scenarios where data supports.
+- **Refined Products & Margins**: Cracks, diesel/gasoline spreads, and implications for downstream logistics.
+- **Maritime & Shipping Impact**: How energy price volatility affects bunker fuel costs, vessel operating expenses, and shipping routes (especially LNG tankers, oil tankers). Highlight chokepoints (Strait of Hormuz, Panama Canal) and any reported disruptions.
+- **Downstream Logistics**: Refinery utilization, inventory levels (crude, products), and potential bottlenecks in pipeline or rail networks.
+- **Geopolitical Flashpoints**: Sanctions, conflicts, or political instability affecting energy supply chains. Focus on Russia-Ukraine, Middle East, and Venezuela/Iran.
+- **Actionable Insights**: For a VP of Energy Procurement, what hedging strategies, contract renegotiations, or alternative sourcing options should be considered for H2 2026?
+
+Structure your answer with clear headings and bullet points. Use data to support every claim.
+""",
+        'regional': """
+**LATAM & Caribbean Geopolitical Risk Assessment – 2026**
+
+Focus on Trinidad & Tobago, the wider Caribbean, and key Latin American economies (Brazil, Mexico, Argentina, Venezuela, Colombia). Your analysis must address:
+
+- **Political Stability & Governance**: Recent elections, protests, or policy shifts that could impact business operations. Include corruption perceptions, rule of law trends, and social unrest risks.
+- **Economic Vulnerability**: Currency volatility, inflation, debt levels, and reliance on commodity exports (oil, gas, minerals, agriculture). Highlight any IMF programs or default risks.
+- **Shipping & Trade Chokepoints**: Assess risks to maritime routes (Panama Canal, Caribbean passages, Amazon River ports). Piracy, port strikes, or infrastructure bottlenecks.
+- **Energy & Mining Sector Focus**: For Trinidad (LNG, petrochemicals), Guyana (oil boom), Venezuela (sanctions), Chile/Peru (copper), Brazil (mining, agribusiness). How do local dynamics affect global supply?
+- **Social & Environmental Factors**: Climate change impacts (hurricanes, droughts), migration flows, and their effect on labor markets and social cohesion.
+- **Risk Scenarios**: Develop two plausible scenarios for the region over the next 12 months (e.g., "Venezuela opens to foreign oil investment" vs. "Regional debt crisis") and their implications for multinational firms.
+- **Recommendations**: For a regional operations director, what contingency plans, diversification strategies, or partnerships should be prioritized?
+
+Use a structured format with numbered sections and bullet points. Reference specific countries and data points.
+""",
+        'tech': """
+**Technology & Digitalization Macro Trends – 2026**
+
+You are advising the CIO of a global logistics firm. Analyze how the provided data signals shifts in tech adoption, automation, and IT services. Address:
+
+- **Automation & AI in Operations**: How are rising labor costs, supply chain volatility, or energy prices accelerating adoption of robotics and AI in warehouses, ports, and field operations? Cite any relevant news (e.g., new factory openings, labor disputes, tech investments).
+- **IT Services & Cloud Demand**: Impact of geopolitical tensions (e.g., US-China tech war) on cloud infrastructure, data sovereignty, and IT outsourcing. Are there signs of regionalization of tech services?
+- **Cybersecurity Risk Landscape**: Increased attacks on critical infrastructure (energy, logistics) – correlate with news events. What vulnerabilities do current macro trends create?
+- **Digitalization of Supply Chains**: Adoption of blockchain for traceability, IoT for asset tracking, and digital twins. How are commodity price swings or trade policy changes influencing investment in these technologies?
+- **Talent & Workforce**: Remote work trends, tech talent migration, and implications for hiring and retention in IT departments.
+- **Strategic Recommendations**: For a global technology officer, what technology investments should be prioritized, delayed, or reconsidered in light of 2026's macro environment? Include specific areas (cybersecurity, AI, cloud).
+
+Be specific and data-driven. Use examples from the news feeds where applicable.
+""",
+        'warehouse': """
+**Warehouse & Inventory Operations Manager Briefing – 2026**
+
+You are speaking directly to a senior warehouse and inventory manager. Translate the macro data into operational impacts and recommendations:
+
+- **Procurement Lead Times**: Based on commodity price trends (metals, lumber, packaging) and news of supply disruptions, estimate changes in lead times for key inputs. Provide a table if possible:
+  | Material | Current Trend | Expected Lead Time Impact |
+  |----------|---------------|----------------------------|
+  | Steel    | +5% price     | +2 weeks due to mill backlogs |
+- **Inventory Holding Costs**: Rising interest rates (from economic data) increase carrying costs. Calculate the impact on cost of capital for inventory. Suggest optimal inventory levels (just-in-case vs. just-in-time).
+- **Facility Resource Allocation**: Energy price volatility affects utility costs. Should the warehouse shift schedules to off-peak hours? Invest in solar? How do labor market trends (unemployment, wage pressures) affect staffing?
+- **Transportation & Inbound Logistics**: Fuel surcharges, trucking availability, and port delays – correlate with news. Advise on carrier diversification or mode shifts (e.g., rail vs. truck).
+- **Risk Mitigation**: Develop a contingency plan for a major disruption (e.g., port strike, energy blackout). What safety stock levels are prudent?
+- **Action Items**: A checklist of 5 immediate actions for the next quarter.
+
+Use practical language and quantify impacts wherever possible.
+""",
+        'pm_risk': """
+**Senior Project Manager Risk Assessment – 2026**
+
+You are managing large-scale infrastructure or industrial projects (e.g., refinery expansion, port development, mining operation). Analyze the data to identify and mitigate risks:
+
+- **Scope Creep Risks**: How might geopolitical events (sanctions, new regulations) or commodity price swings force design changes? Provide examples.
+- **Schedule Risks**: Supply chain delays for critical equipment (e.g., turbines, steel, semiconductors). Use news and price data to estimate potential delays. Create a simple risk matrix (Likelihood vs. Impact).
+- **Cost Escalation**: Inflation in raw materials, labor, and energy. Quantify potential overruns. What contingency percentage is advisable?
+- **Labor & Workforce**: Strikes, skilled labor shortages, or immigration policy changes affecting project staffing.
+- **Financing & Currency**: Interest rate hikes (from economic data) increasing cost of capital. Currency volatility impacting imported equipment costs.
+- **Mitigation Strategies**: For each top risk, propose concrete mitigation (e.g., advance procurement, dual sourcing, fixed-price contracts, modular construction).
+- **Monitoring Recommendations**: Key indicators (KPIs) to track weekly to stay ahead of risks.
+
+Structure your response as a formal risk assessment report with sections, tables, and clear bullet points.
+""",
+        'crypto': """
+**Digital Assets & Crypto Market Analysis – 2026**
+
+You are advising a crypto hedge fund. Analyze how traditional macro factors and news events are influencing digital assets:
+
+- **Macro Drivers**: Correlation of Bitcoin/Ethereum with equities, commodities (especially gold), and the US dollar. How do interest rate expectations (from economic data) affect crypto as a risk asset or inflation hedge?
+- **Regulatory News**: Track any mentions of crypto regulation in news feeds (SEC, EU MiCA, China bans). Assess potential market impact.
+- **Institutional Adoption**: News of major companies adding crypto to balance sheets, banks offering custody, or ETF flows.
+- **On-Chain & Sentiment Indicators**: While not directly in data, infer from price action and news sentiment (e.g., "fear" vs. "greed").
+- **Energy & Mining**: Impact of energy prices on Bitcoin mining profitability and hash rate. Any news on mining migration?
+- **Geopolitical Risk**: Use of crypto for sanctions evasion, capital flight from unstable regions. How do conflicts affect demand?
+- **Outlook & Positioning**: Based on the above, provide a tactical outlook for the next 3–6 months. Recommend portfolio positioning (e.g., overweight Bitcoin, underweight altcoins, hedge with options).
+
+Be analytical and data-backed. Avoid hype.
+""",
+        'power_structures': """
+**Advanced Geopolitical Power Structures Analysis – 2026**
+
+You are a geopolitical strategist advising a sovereign wealth fund. Analyze the data through the lens of shifting global power dynamics:
+
+- **US-China Rivalry**: How do current events (trade wars, tech bans, military exercises) indicate escalation or de-escalation? Impact on global supply chains, technology decoupling, and financial systems.
+- **Regional Power Shifts**: Rise of new blocs (BRICS+, SCO). Any news of currency de-dollarization, new trade pacts, or military alliances?
+- **Energy as a Weapon**: How are energy-exporting nations (Russia, Saudi, Iran) using supply to exert influence? What does that mean for Europe, Asia, and energy security?
+- **Economic Warfare**: Sanctions, export controls, and asset freezes. Analyze effectiveness and blowback. Are there signs of weaponized interdependence?
+- **Systemic Control**: How are digital currencies, surveillance tech, and data localization reshaping state control over economies?
+- **Fragile States & Proxy Conflicts**: Identify regions where state failure or proxy wars could disrupt global markets (e.g., Sahel, Horn of Africa, Myanmar).
+- **Implications for Investors**: What sectors, regions, or asset classes are most exposed? Should portfolios tilt toward hard assets, defense, or commodities?
+
+Provide a deep, nuanced analysis with historical context and forward-looking scenarios. Use structured sections and bullet points.
+"""
+    }
+
+    user_prompt = f"""**Data for 2026 Analysis**
+Market & Economic Data:
+{market_context}
+
+Latest Intelligence (News):
+{news_context}
+
+**Analysis Task:**
+{prompts.get(prompt_type, prompts['general'])}"""
+
+    try:
+        client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.3,
+            max_tokens=2500
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"**Analysis failed:** {e}"
