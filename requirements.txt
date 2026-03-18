@@ -1,8 +1,8 @@
-streamlit
-yfinance
-feedparser
-openai
-plotly
-pandas
-reportlab
-Pillow
+streamlit>=1.35.0
+yfinance>=0.2.40
+feedparser>=6.0.11
+openai>=1.30.0
+requests>=2.31.0
+pandas>=2.2.0
+urllib3>=2.0.0
+ 
