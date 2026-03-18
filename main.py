@@ -106,6 +106,13 @@ st.markdown("""
     [data-testid="stSidebar"] > div {
         padding-top: 0 !important;
     }
+    /* Hide the default Streamlit sidebar header that duplicates the title */
+    [data-testid="stSidebarHeader"] {
+        display: none !important;
+    }
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+    }
     [data-testid="stSidebar"] * {
         font-family: var(--font-body) !important;
         color: var(--text-sidebar) !important;
