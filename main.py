@@ -238,229 +238,7 @@ class DataSourceManager:
         return results
 
 # ==========================================
-# 4. INITIALISE SESSION STATE
-# ==========================================
-if "data_manager" not in st.session_state:
-    st.session_state.data_manager = DataSourceManager(ALL_SOURCES)
-if "fetched_results" not in st.session_state:
-    st.session_state.fetched_results = None
-if "analysis_in_progress" not in st.session_state:
-    st.session_state.analysis_in_progress = False
-
-# ==========================================
-# 5. SIDEBAR CONFIGURATION
-# ==========================================
-with st.sidebar:
-    st.title("⚙️ Configuration")
-    
-    # API Key input (DeepSeek)
-    api_key = st.text_input("DeepSeek API Key", type="password")
-    if not api_key:
-        api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key:
-        try:
-            api_key = st.secrets["DEEPSEEK_API_KEY"]
-        except:
-            pass
-    
-    if api_key:
-        st.success("✅ DeepSeek key set")
-    else:
-        st.warning("⚠️ DeepSeek key missing")
-    
-    st.markdown("---")
-    
-    # Source selection
-    st.subheader("📡 Data Sources")
-    categories = list(set(s["category"] for s in ALL_SOURCES))
-    selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
-    
-    filtered_sources = ALL_SOURCES
-    if selected_category != "All":
-        filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
-    
-    source_names = [s["name"] for s in filtered_sources]
-    selected_sources = st.multiselect(
-        "Select sources to fetch",
-        options=source_names,
-        default=source_names[:10]
-    )
-    
-    update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
-    
-    if st.button("🔄 Fetch Selected Sources", use_container_width=True):
-        with st.spinner(f"Fetching {len(selected_sources)} sources..."):
-            results = st.session_state.data_manager.fetch_selected(selected_sources)
-            st.session_state.fetched_results = results
-            success_count = sum(1 for v in results.values() if "error" not in v)
-            st.success(f"Fetched {success_count}/{len(selected_sources)} sources")
-    
-    st.markdown("---")
-    st.caption("© 2026 Macro-Risk Intelligence")
-
-# ==========================================
-# 6. PROFESSIONAL DASHBOARD UI
-# ==========================================
-
-st.title("🌍 Macro-Risk Intelligence Hub")
-st.markdown("#### Real‑time monitoring of economic, energy & geopolitical risks")
-st.caption(f"Data updated live • Session started: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-if st.session_state.fetched_results:
-    results = st.session_state.fetched_results
-
-    # 1. Key Metrics Row
-    st.subheader("📊 Key Market Snapshot")
-    price_sources = [(name, data) for name, data in results.items()
-                     if isinstance(data, dict) and "price" in data]
-
-    if price_sources:
-        metric_cols = st.columns(4)
-        for i, (name, data) in enumerate(price_sources[:4]):
-            with metric_cols[i]:
-                st.metric(
-                    label=name,
-                    value=f"${data['price']:,.2f}",
-                    delta=f"{data.get('change', 0):+.2f}",
-                    delta_color="normal"
-                )
-
-        if len(price_sources) > 4:
-            metric_cols2 = st.columns(4)
-            for i, (name, data) in enumerate(price_sources[4:8]):
-                with metric_cols2[i]:
-                    st.metric(
-                        label=name,
-                        value=f"${data['price']:,.2f}",
-                        delta=f"{data.get('change', 0):+.2f}",
-                        delta_color="normal"
-                    )
-    else:
-        st.info("Select commodity sources in the sidebar to see price snapshots.")
-
-    st.divider()
-
-    # 2. Categorized Data Expanders
-    st.subheader("📂 Detailed Source Data")
-
-    categories_in_results = {}
-    for src_name, data in results.items():
-        src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
-        cat = src["category"] if src else "Other"
-        categories_in_results.setdefault(cat, []).append((src_name, data))
-
-    category_order = ["Energy", "Metals", "Agriculture", "Economic", "Monetary", "Currency", "Equities", "Crypto", "News", "Geopolitical", "Other"]
-
-    for cat in category_order:
-        if cat in categories_in_results:
-            items = categories_in_results[cat]
-            with st.expander(f"**{cat}** ({len(items)} sources)", expanded=cat in ["Energy", "Economic"]):
-                cols = st.columns(3)
-                for idx, (name, data) in enumerate(items):
-                    with cols[idx % 3]:
-                        with st.container(border=True):
-                            st.caption(name)
-                            if "error" in data:
-                                st.error(f"❌ {data['error']}")
-                            elif "price" in data:
-                                st.metric("Price", f"${data['price']}", delta=f"{data.get('change',0):+.2f}")
-                            elif "headlines" in data:
-                                for hl in data["headlines"][:2]:
-                                    st.markdown(f"- {hl['title'][:60]}...")
-                                if len(data["headlines"]) > 2:
-                                    st.markdown(f"*+{len(data['headlines'])-2} more*")
-                            elif "value" in data:
-                                st.write(f"**Value:** {data['value']}")
-                                st.caption(f"as of {data.get('date', 'N/A')}")
-                            elif "data" in data:
-                                st.write("Data available")
-                                with st.popover("Preview"):
-                                    st.json(data["data"])
-                            else:
-                                st.write("✓ Data received")
-
-    st.divider()
-
-    # 3. AI Analysis Section
-    st.subheader("🧠 AI-Powered Strategic Analysis")
-    st.markdown("Select a focus area to generate a forward-looking briefing based on **current 2026 data**.")
-
-    analysis_type = st.selectbox(
-        "Choose analysis lens:",
-        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
-         "Tech & Digitalization", "Warehouse Ops", "PM Risk",
-         "Crypto", "Geopolitical Power"],
-        key="analysis_selector"
-    )
-
-    prompt_map = {
-        "General Macro": "general",
-        "Energy & Maritime": "energy",
-        "LATAM/Caribbean Risk": "regional",
-        "Tech & Digitalization": "tech",
-        "Warehouse Ops": "warehouse",
-        "PM Risk": "pm_risk",
-        "Crypto": "crypto",
-        "Geopolitical Power": "power_structures"
-    }
-
-    if st.button("🚀 Generate Briefing", type="primary", use_container_width=True):
-        if not api_key:
-            st.error("⚠️ DeepSeek API key required. Please add it in the sidebar.")
-        elif not st.session_state.fetched_results:
-            st.warning("Please fetch data sources first.")
-        else:
-            st.session_state.analysis_in_progress = True
-
-            with st.status("🔄 Generating comprehensive briefing...", expanded=True) as status:
-                st.write("📊 Compiling market data...")
-                market_lines = []
-                news_lines = []
-                for name, data in results.items():
-                    if "error" in data:
-                        continue
-                    if "price" in data:
-                        market_lines.append(f"- {name}: ${data['price']} (change: {data.get('change',0):+.2f})")
-                    elif "headlines" in data:
-                        for hl in data["headlines"][:2]:
-                            news_lines.append(f"- {hl['title']}")
-                    elif "value" in data:
-                        market_lines.append(f"- {name}: {data['value']} (as of {data.get('date','N/A')})")
-
-                market_context = "\n".join(market_lines[:25])
-                news_context = "\n".join(news_lines[:12])
-
-                st.write("🧠 Calling DeepSeek API for 2026 analysis...")
-                report = analyze_with_deepseek(prompt_map[analysis_type], market_context, news_context, api_key)
-                status.update(label="✅ Briefing ready", state="complete")
-
-            with st.container(border=True):
-                st.markdown("### Strategic Briefing for 2026")
-                st.markdown(report)
-
-            st.download_button(
-                label="📥 Download Briefing (Markdown)",
-                data=report,
-                file_name=f"macro_briefing_{int(time.time())}.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-
-            st.session_state.analysis_in_progress = False
-
-else:
-    st.info("👈 **Start here:** Select data sources in the sidebar and click 'Fetch Selected Sources' to populate the dashboard.")
-    with st.container(border=True):
-        st.markdown("**Dashboard Preview**")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1: st.metric("Crude Oil", "$--.--", "--")
-        with col2: st.metric("Gold", "$--.--", "--")
-        with col3: st.metric("S&P 500", "--.--", "--")
-        with col4: st.metric("VIX", "--.--", "--")
-        st.caption("Select and fetch sources to see live data.")
-
-# ==========================================
-# 7. EXPANDED AI PROMPTS FUNCTION
+# 4. EXPANDED AI PROMPTS FUNCTION
 # ==========================================
 def analyze_with_deepseek(prompt_type: str, market_context: str, news_context: str, api_key: str) -> str:
     """
@@ -619,3 +397,225 @@ Latest Intelligence (News):
         return response.choices[0].message.content
     except Exception as e:
         return f"**Analysis failed:** {e}"
+
+# ==========================================
+# 5. INITIALISE SESSION STATE
+# ==========================================
+if "data_manager" not in st.session_state:
+    st.session_state.data_manager = DataSourceManager(ALL_SOURCES)
+if "fetched_results" not in st.session_state:
+    st.session_state.fetched_results = None
+if "analysis_in_progress" not in st.session_state:
+    st.session_state.analysis_in_progress = False
+
+# ==========================================
+# 6. SIDEBAR CONFIGURATION
+# ==========================================
+with st.sidebar:
+    st.title("⚙️ Configuration")
+    
+    # API Key input (DeepSeek)
+    api_key = st.text_input("DeepSeek API Key", type="password")
+    if not api_key:
+        api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not api_key:
+        try:
+            api_key = st.secrets["DEEPSEEK_API_KEY"]
+        except:
+            pass
+    
+    if api_key:
+        st.success("✅ DeepSeek key set")
+    else:
+        st.warning("⚠️ DeepSeek key missing")
+    
+    st.markdown("---")
+    
+    # Source selection
+    st.subheader("📡 Data Sources")
+    categories = list(set(s["category"] for s in ALL_SOURCES))
+    selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
+    
+    filtered_sources = ALL_SOURCES
+    if selected_category != "All":
+        filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
+    
+    source_names = [s["name"] for s in filtered_sources]
+    selected_sources = st.multiselect(
+        "Select sources to fetch",
+        options=source_names,
+        default=source_names[:10]
+    )
+    
+    update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
+    
+    if st.button("🔄 Fetch Selected Sources", use_container_width=True):
+        with st.spinner(f"Fetching {len(selected_sources)} sources..."):
+            results = st.session_state.data_manager.fetch_selected(selected_sources)
+            st.session_state.fetched_results = results
+            success_count = sum(1 for v in results.values() if "error" not in v)
+            st.success(f"Fetched {success_count}/{len(selected_sources)} sources")
+    
+    st.markdown("---")
+    st.caption("© 2026 Macro-Risk Intelligence")
+
+# ==========================================
+# 7. PROFESSIONAL DASHBOARD UI
+# ==========================================
+
+st.title("🌍 Macro-Risk Intelligence Hub")
+st.markdown("#### Real‑time monitoring of economic, energy & geopolitical risks")
+st.caption(f"Data updated live • Session started: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+if st.session_state.fetched_results:
+    results = st.session_state.fetched_results
+
+    # 1. Key Metrics Row
+    st.subheader("📊 Key Market Snapshot")
+    price_sources = [(name, data) for name, data in results.items()
+                     if isinstance(data, dict) and "price" in data]
+
+    if price_sources:
+        metric_cols = st.columns(4)
+        for i, (name, data) in enumerate(price_sources[:4]):
+            with metric_cols[i]:
+                st.metric(
+                    label=name,
+                    value=f"${data['price']:,.2f}",
+                    delta=f"{data.get('change', 0):+.2f}",
+                    delta_color="normal"
+                )
+
+        if len(price_sources) > 4:
+            metric_cols2 = st.columns(4)
+            for i, (name, data) in enumerate(price_sources[4:8]):
+                with metric_cols2[i]:
+                    st.metric(
+                        label=name,
+                        value=f"${data['price']:,.2f}",
+                        delta=f"{data.get('change', 0):+.2f}",
+                        delta_color="normal"
+                    )
+    else:
+        st.info("Select commodity sources in the sidebar to see price snapshots.")
+
+    st.divider()
+
+    # 2. Categorized Data Expanders
+    st.subheader("📂 Detailed Source Data")
+
+    categories_in_results = {}
+    for src_name, data in results.items():
+        src = next((s for s in ALL_SOURCES if s["name"] == src_name), None)
+        cat = src["category"] if src else "Other"
+        categories_in_results.setdefault(cat, []).append((src_name, data))
+
+    category_order = ["Energy", "Metals", "Agriculture", "Economic", "Monetary", "Currency", "Equities", "Crypto", "News", "Geopolitical", "Other"]
+
+    for cat in category_order:
+        if cat in categories_in_results:
+            items = categories_in_results[cat]
+            with st.expander(f"**{cat}** ({len(items)} sources)", expanded=cat in ["Energy", "Economic"]):
+                cols = st.columns(3)
+                for idx, (name, data) in enumerate(items):
+                    with cols[idx % 3]:
+                        with st.container(border=True):
+                            st.caption(name)
+                            if "error" in data:
+                                st.error(f"❌ {data['error']}")
+                            elif "price" in data:
+                                st.metric("Price", f"${data['price']}", delta=f"{data.get('change',0):+.2f}")
+                            elif "headlines" in data:
+                                for hl in data["headlines"][:2]:
+                                    st.markdown(f"- {hl['title'][:60]}...")
+                                if len(data["headlines"]) > 2:
+                                    st.markdown(f"*+{len(data['headlines'])-2} more*")
+                            elif "value" in data:
+                                st.write(f"**Value:** {data['value']}")
+                                st.caption(f"as of {data.get('date', 'N/A')}")
+                            elif "data" in data:
+                                st.write("Data available")
+                                with st.popover("Preview"):
+                                    st.json(data["data"])
+                            else:
+                                st.write("✓ Data received")
+
+    st.divider()
+
+    # 3. AI Analysis Section
+    st.subheader("🧠 AI-Powered Strategic Analysis")
+    st.markdown("Select a focus area to generate a forward-looking briefing based on **current 2026 data**.")
+
+    analysis_type = st.selectbox(
+        "Choose analysis lens:",
+        ["General Macro", "Energy & Maritime", "LATAM/Caribbean Risk",
+         "Tech & Digitalization", "Warehouse Ops", "PM Risk",
+         "Crypto", "Geopolitical Power"],
+        key="analysis_selector"
+    )
+
+    prompt_map = {
+        "General Macro": "general",
+        "Energy & Maritime": "energy",
+        "LATAM/Caribbean Risk": "regional",
+        "Tech & Digitalization": "tech",
+        "Warehouse Ops": "warehouse",
+        "PM Risk": "pm_risk",
+        "Crypto": "crypto",
+        "Geopolitical Power": "power_structures"
+    }
+
+    if st.button("🚀 Generate Briefing", type="primary", use_container_width=True):
+        if not api_key:
+            st.error("⚠️ DeepSeek API key required. Please add it in the sidebar.")
+        elif not st.session_state.fetched_results:
+            st.warning("Please fetch data sources first.")
+        else:
+            st.session_state.analysis_in_progress = True
+
+            with st.status("🔄 Generating comprehensive briefing...", expanded=True) as status:
+                st.write("📊 Compiling market data...")
+                market_lines = []
+                news_lines = []
+                for name, data in results.items():
+                    if "error" in data:
+                        continue
+                    if "price" in data:
+                        market_lines.append(f"- {name}: ${data['price']} (change: {data.get('change',0):+.2f})")
+                    elif "headlines" in data:
+                        for hl in data["headlines"][:2]:
+                            news_lines.append(f"- {hl['title']}")
+                    elif "value" in data:
+                        market_lines.append(f"- {name}: {data['value']} (as of {data.get('date','N/A')})")
+
+                market_context = "\n".join(market_lines[:25])
+                news_context = "\n".join(news_lines[:12])
+
+                st.write("🧠 Calling DeepSeek API for 2026 analysis...")
+                report = analyze_with_deepseek(prompt_map[analysis_type], market_context, news_context, api_key)
+                status.update(label="✅ Briefing ready", state="complete")
+
+            with st.container(border=True):
+                st.markdown("### Strategic Briefing for 2026")
+                st.markdown(report)
+
+            st.download_button(
+                label="📥 Download Briefing (Markdown)",
+                data=report,
+                file_name=f"macro_briefing_{int(time.time())}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+
+            st.session_state.analysis_in_progress = False
+
+else:
+    st.info("👈 **Start here:** Select data sources in the sidebar and click 'Fetch Selected Sources' to populate the dashboard.")
+    with st.container(border=True):
+        st.markdown("**Dashboard Preview**")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1: st.metric("Crude Oil", "$--.--", "--")
+        with col2: st.metric("Gold", "$--.--", "--")
+        with col3: st.metric("S&P 500", "--.--", "--")
+        with col4: st.metric("VIX", "--.--", "--")
+        st.caption("Select and fetch sources to see live data.")
