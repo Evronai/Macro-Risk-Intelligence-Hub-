@@ -11,13 +11,230 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # ==========================================
-# 1. PAGE CONFIGURATION
+# 1. PAGE CONFIGURATION & CUSTOM CSS
 # ==========================================
 st.set_page_config(
     page_title="Macro-Risk Intelligence Hub",
     page_icon="🌍",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+# ----- PROFESSIONAL "BIG 4" STYLE CSS -----
+st.markdown("""
+<style>
+    /* Import Google Fonts for a clean, corporate look */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Main background and text */
+    .stApp {
+        background-color: #f5f7fa;
+        color: #1e293b;
+    }
+
+    /* Sidebar styling */
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+    }
+    section[data-testid="stSidebar"] .stMarkdown h1, 
+    section[data-testid="stSidebar"] .stMarkdown h2, 
+    section[data-testid="stSidebar"] .stMarkdown h3 {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    /* Headers */
+    h1, h2, h3 {
+        color: #0f172a;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+    h1 {
+        font-size: 2.2rem;
+        border-bottom: 2px solid #2563eb;
+        padding-bottom: 0.3rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    .stMarkdown h3 {
+        font-size: 1.2rem;
+        color: #334155;
+    }
+
+    /* Metric cards */
+    div[data-testid="stMetricValue"] {
+        font-size: 2rem !important;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    div[data-testid="stMetricDelta"] {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    /* Expanders (data source sections) */
+    .streamlit-expanderHeader {
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #0f172a;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .streamlit-expanderHeader:hover {
+        background-color: #f8fafc;
+    }
+    .streamlit-expanderContent {
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        background-color: white;
+        padding: 1.5rem;
+    }
+
+    /* Cards for source items */
+    .source-card {
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+    .source-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .source-card .caption {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.5rem;
+    }
+    .source-card .title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+    .source-card .value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2);
+        transition: all 0.2s;
+    }
+    .stButton > button:hover {
+        background-color: #1d4ed8;
+        box-shadow: 0 10px 15px -3px rgba(37,99,235,0.3);
+        transform: translateY(-1px);
+    }
+    .stButton > button:disabled {
+        background-color: #94a3b8;
+        box-shadow: none;
+    }
+
+    /* Primary button (Generate Briefing) */
+    div[data-testid="stButton"] button[kind="primary"] {
+        background-color: #0f172a;
+        color: white;
+    }
+    div[data-testid="stButton"] button[kind="primary"]:hover {
+        background-color: #1e293b;
+    }
+
+    /* Select boxes and inputs */
+    .stSelectbox label, .stMultiSelect label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #334155;
+    }
+    div[data-baseweb="select"] > div {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    /* Dividers */
+    hr {
+        margin: 2rem 0;
+        border-color: #e2e8f0;
+    }
+
+    /* Status messages (success, info, warning) */
+    .stAlert {
+        border-radius: 8px;
+        border-left-width: 4px;
+        font-weight: 500;
+    }
+    .stAlert.success {
+        background-color: #d1fae5;
+        border-left-color: #10b981;
+    }
+    .stAlert.info {
+        background-color: #dbeafe;
+        border-left-color: #3b82f6;
+    }
+    .stAlert.warning {
+        background-color: #fed7aa;
+        border-left-color: #f97316;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: white;
+        border-radius: 8px 8px 0 0;
+        padding: 10px 20px;
+        font-weight: 500;
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #2563eb;
+        color: white;
+    }
+
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        padding: 1rem 0;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # 2. SOURCE REGISTRY (90+ FREE SOURCES)
@@ -519,26 +736,13 @@ if st.session_state.fetched_results:
                 cols = st.columns(3)
                 for idx, (name, data) in enumerate(items):
                     with cols[idx % 3]:
-                        with st.container(border=True):
-                            st.caption(name)
-                            if "error" in data:
-                                st.error(f"❌ {data['error']}")
-                            elif "price" in data:
-                                st.metric("Price", f"${data['price']}", delta=f"{data.get('change',0):+.2f}")
-                            elif "headlines" in data:
-                                for hl in data["headlines"][:2]:
-                                    st.markdown(f"- {hl['title'][:60]}...")
-                                if len(data["headlines"]) > 2:
-                                    st.markdown(f"*+{len(data['headlines'])-2} more*")
-                            elif "value" in data:
-                                st.write(f"**Value:** {data['value']}")
-                                st.caption(f"as of {data.get('date', 'N/A')}")
-                            elif "data" in data:
-                                st.write("Data available")
-                                with st.popover("Preview"):
-                                    st.json(data["data"])
-                            else:
-                                st.write("✓ Data received")
+                        # Apply custom card styling using div and class
+                        st.markdown(f"""
+                        <div class="source-card">
+                            <div class="caption">{name}</div>
+                            {render_source_data(data)}
+                        </div>
+                        """, unsafe_allow_html=True)
 
     st.divider()
 
@@ -619,3 +823,31 @@ else:
         with col3: st.metric("S&P 500", "--.--", "--")
         with col4: st.metric("VIX", "--.--", "--")
         st.caption("Select and fetch sources to see live data.")
+
+# ==========================================
+# Helper function to render source data inside cards
+# ==========================================
+def render_source_data(data):
+    if "error" in data:
+        return f'<span style="color:#ef4444;">❌ {data["error"]}</span>'
+    elif "price" in data:
+        change = data.get('change', 0)
+        change_class = "positive" if change > 0 else "negative" if change < 0 else "neutral"
+        return f"""
+        <div class="value">${data['price']}</div>
+        <div style="font-size:0.9rem; color:{'#10b981' if change>0 else '#ef4444' if change<0 else '#64748b'};">
+            {change:+.2f}
+        </div>
+        """
+    elif "headlines" in data:
+        headlines = "".join([f"<li>{h['title'][:60]}...</li>" for h in data["headlines"][:2]])
+        return f"<ul style='margin:0; padding-left:1rem;'>{headlines}</ul>"
+    elif "value" in data:
+        return f"""
+        <div style="font-size:1rem; font-weight:500;">{data['value']}</div>
+        <div style="font-size:0.8rem; color:#64748b;">as of {data.get('date', 'N/A')}</div>
+        """
+    elif "data" in data:
+        return "<span>Data available</span>"
+    else:
+        return "<span>✓ Data received</span>"
