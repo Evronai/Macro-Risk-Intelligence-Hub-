@@ -1452,6 +1452,36 @@ with st.sidebar:
 
     # Data Sources
     st.markdown("## Data Sources")
+
+    # Build a recommended default: top sources from every category
+    _DEFAULT_PER_CATEGORY = {
+        "Energy":       ["Crude Oil (WTI)", "Brent Oil", "Natural Gas", "RBOB Gasoline", "Heating Oil"],
+        "Metals":       ["Gold", "Silver", "Copper", "Platinum"],
+        "Agriculture":  ["Wheat", "Corn", "Soybeans", "Coffee"],
+        "Economic":     ["US GDP (Current USD)", "US GDP Growth Rate", "US Unemployment Rate",
+                         "US CPI Inflation", "UK Unemployment Rate", "Eurozone GDP Growth",
+                         "Japan CPI Inflation", "India GDP Growth", "Australia CPI Inflation",
+                         "China PMI (Shanghai Comp)"],
+        "Monetary":     ["US Fed Funds Rate", "US 10-Year Treasury", "US 2-Year Treasury",
+                         "Brazil Interest Rate (EWZ)"],
+        "Currency":     ["US Dollar Index", "EUR/USD", "GBP/USD", "USD/JPY", "USD/CNY"],
+        "Equities":     ["S&P 500", "Dow Jones", "NASDAQ", "Russell 2000",
+                         "FTSE 100", "DAX", "Nikkei 225", "Hang Seng", "VIX"],
+        "Crypto":       ["Bitcoin", "Ethereum", "Solana", "XRP"],
+        "News":         ["BBC Business", "BBC World", "Reuters Business",
+                         "CNBC World News", "OilPrice.com", "gCaptain",
+                         "The Guardian Economics", "Al Jazeera Business"],
+        "Geopolitical": ["USGS Earthquakes (M5.5+)",
+                         "Open-Meteo Climate (London)", "Open-Meteo Climate (New York)",
+                         "World Bank — Global GDP (current USD)", "World Bank — Global Inflation",
+                         "World Bank — US Debt (% GDP)", "World Bank — China GDP Growth",
+                         "World Bank — EU Unemployment",
+                         "REST Countries — Americas", "REST Countries — Europe",
+                         "US Public Holidays 2026", "UK Public Holidays 2026"],
+    }
+    _all_defaults = [s for names in _DEFAULT_PER_CATEGORY.values() for s in names
+                     if any(src["name"] == s for src in ALL_SOURCES)]
+
     categories = list(set(s["category"] for s in ALL_SOURCES))
     selected_category = st.selectbox("Filter by category", ["All"] + sorted(categories))
 
@@ -1460,11 +1490,33 @@ with st.sidebar:
         filtered_sources = [s for s in ALL_SOURCES if s["category"] == selected_category]
 
     source_names = [s["name"] for s in filtered_sources]
+
+    # Quick-select buttons
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("✓ Select All", use_container_width=True, key="sel_all"):
+            st.session_state["_src_selection"] = source_names
+    with col_b:
+        if st.button("✕ Clear", use_container_width=True, key="sel_none"):
+            st.session_state["_src_selection"] = []
+
+    # Determine default: session override → recommended defaults → first 10
+    if "_src_selection" in st.session_state:
+        _default = [s for s in st.session_state["_src_selection"] if s in source_names]
+    else:
+        _default = [s for s in _all_defaults if s in source_names] or source_names[:10]
+
     selected_sources = st.multiselect(
         "Active sources",
         options=source_names,
-        default=source_names[:10]
+        default=_default,
+        key="source_multiselect"
     )
+    # Keep session state in sync
+    st.session_state["_src_selection"] = selected_sources
+
+    st.caption(f"{len(selected_sources)} of {len(source_names)} sources selected")
+
 
     st.markdown("## Refresh Settings")
     update_freq = st.slider("Cache duration (seconds)", 300, 7200, 3600, step=300)
