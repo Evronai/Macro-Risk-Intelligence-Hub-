@@ -1798,7 +1798,7 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ── Status block ──
-    results = st.session_state.get("fetched_results")
+    results = st.session_state.get("fetched_results") or {}
     last_t  = st.session_state.get("last_fetch_time")
 
     if last_t:
@@ -1861,43 +1861,59 @@ with st.sidebar:
         "EUR/USD", "GBP/USD",
     ]
 
-    if results:
-        tickers_shown = 0
-        for name in TICKER_SYMBOLS:
-            data = results.get(name, {})
-            if "price" in data:
-                price  = data["price"]
-                change = data.get("change", 0)
-                color  = "#4ade80" if change >= 0 else "#f87171"
-                arrow  = "▲" if change >= 0 else "▼"
-                spark  = make_sparkline(data.get("spark", []), color, width=52, height=20)
-                st.markdown(
-                    f"<div style='display:flex; justify-content:space-between; align-items:center; "
-                    f"padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.05); gap:0.3rem;'>"
-                    f"<span style='font-family:\"Source Sans 3\",sans-serif; font-size:0.7rem; "
-                    f"color:#b8c4d8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; "
-                    f"flex:1; min-width:0;'>{name}</span>"
-                    f"<span style='flex-shrink:0;'>{spark}</span>"
-                    f"<span style='font-family:\"Source Code Pro\",monospace; font-size:0.7rem; "
-                    f"color:#e0e7f0; text-align:right; flex-shrink:0; white-space:nowrap;'>"
-                    f"${price:,.2f} <span style='color:{color}; font-size:0.62rem;'>{arrow}{abs(change):.2f}</span>"
-                    f"</span></div>",
-                    unsafe_allow_html=True
-                )
-                tickers_shown += 1
-        if tickers_shown == 0:
+    # Use session state directly to guarantee freshest data
+    _sidebar_results = st.session_state.get("fetched_results") or {}
+
+    # Build ticker list: preferred symbols first, then any other price data
+    _ticker_items = []
+    for name in TICKER_SYMBOLS:
+        d = _sidebar_results.get(name, {})
+        if isinstance(d, dict) and "price" in d:
+            _ticker_items.append((name, d))
+
+    # If none of the preferred names were fetched, show whatever price data exists
+    if not _ticker_items:
+        for name, d in _sidebar_results.items():
+            if isinstance(d, dict) and "price" in d:
+                _ticker_items.append((name, d))
+            if len(_ticker_items) >= 13:
+                break
+
+    if _ticker_items:
+        for name, data in _ticker_items:
+            price  = data["price"]
+            change = data.get("change", 0)
+            color  = "#4ade80" if change >= 0 else "#f87171"
+            arrow  = "▲" if change >= 0 else "▼"
+            spark  = make_sparkline(data.get("spark", []), color, width=52, height=20)
             st.markdown(
-                "<div style='font-size:0.72rem; color:#4a5a70; font-style:italic;'>"
-                "Fetch price sources to see ticker.</div>",
+                f"<div style='display:flex; justify-content:space-between; align-items:center; "
+                f"padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.05); gap:0.3rem;'>"
+                f"<span style='font-family:\"Source Sans 3\",sans-serif; font-size:0.7rem; "
+                f"color:#b8c4d8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; "
+                f"flex:1; min-width:0;'>{name}</span>"
+                f"<span style='flex-shrink:0;'>{spark}</span>"
+                f"<span style='font-family:\"Source Code Pro\",monospace; font-size:0.7rem; "
+                f"color:#e0e7f0; text-align:right; flex-shrink:0; white-space:nowrap;'>"
+                f"${price:,.2f} "
+                f"<span style='color:{color}; font-size:0.62rem;'>{arrow}{abs(change):.2f}</span>"
+                f"</span></div>",
                 unsafe_allow_html=True
             )
+    elif _sidebar_results:
+        st.markdown(
+            "<div style='font-size:0.72rem; color:#4a5a70; font-style:italic;'>"
+            "No price sources selected. Add Energy, Metals, or Equities sources.</div>",
+            unsafe_allow_html=True
+        )
     else:
         for name in TICKER_SYMBOLS[:6]:
             st.markdown(
                 f"<div style='display:flex; justify-content:space-between; padding:0.28rem 0; "
                 f"border-bottom:1px solid rgba(255,255,255,0.05);'>"
                 f"<span style='font-size:0.72rem; color:#4a5a70;'>{name}</span>"
-                f"<span style='font-size:0.72rem; color:#4a5a70; font-family:\"Source Code Pro\",monospace;'>—</span>"
+                f"<span style='font-size:0.72rem; color:#4a5a70; "
+                f"font-family:\"Source Code Pro\",monospace;'>—</span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
