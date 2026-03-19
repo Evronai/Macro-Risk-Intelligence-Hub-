@@ -1710,10 +1710,144 @@ _DEFAULT_PER_CATEGORY = {
 _all_defaults = [s for names in _DEFAULT_PER_CATEGORY.values() for s in names
                  if any(src["name"] == s for src in ALL_SOURCES)]
 
-# Keep also a minimal sidebar (just collapse button target — hidden visually)
+# ── Sidebar — live status & quick-reference panel (desktop) ──
 with st.sidebar:
-    st.markdown("<!-- sidebar placeholder -->", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background:linear-gradient(180deg,#1a2340 0%,#1e2a50 100%);
+                margin:-1rem -1rem 0 -1rem; padding:1.4rem 1.2rem 1rem 1.2rem;
+                border-bottom:2px solid #c8960c;">
+        <div style="font-family:'Source Sans 3',sans-serif; font-size:0.55rem; font-weight:600;
+                    letter-spacing:0.2em; text-transform:uppercase; color:#7a8ba8; margin-bottom:0.3rem;">
+            Intelligence Platform
+        </div>
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:1.05rem;
+                    font-weight:700; color:#ffffff; line-height:1.2;">
+            Macro-Risk Hub
+        </div>
+        <div style="font-size:0.65rem; color:#7a8ba8; margin-top:0.2rem;
+                    font-family:'Source Sans 3',sans-serif;">
+            2026 Edition
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Status block ──
+    results = st.session_state.get("fetched_results")
+    last_t  = st.session_state.get("last_fetch_time")
+
+    if last_t:
+        st.markdown(
+            f"<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.62rem; "
+            f"color:#7a8ba8; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.2rem;'>"
+            f"Last updated</div>"
+            f"<div style='font-family:\"Source Code Pro\",monospace; font-size:0.82rem; "
+            f"color:#b8c4d8; margin-bottom:1rem;'>"
+            f"{time.strftime('%H:%M:%S', time.localtime(last_t))}</div>",
+            unsafe_allow_html=True
+        )
+        ok  = sum(1 for v in results.values() if "error" not in v)
+        err = len(results) - ok
+        st.markdown(
+            f"<div style='display:flex; gap:0.5rem; margin-bottom:1rem;'>"
+            f"<div style='flex:1; background:rgba(22,101,52,0.25); border:1px solid rgba(22,101,52,0.4); "
+            f"border-radius:3px; padding:0.5rem 0.4rem; text-align:center;'>"
+            f"<div style='font-size:1.1rem; font-weight:700; color:#4ade80;'>{ok}</div>"
+            f"<div style='font-size:0.58rem; color:#7a8ba8; text-transform:uppercase; "
+            f"letter-spacing:0.1em;'>Live</div></div>"
+            f"<div style='flex:1; background:rgba(185,28,28,0.2); border:1px solid rgba(185,28,28,0.35); "
+            f"border-radius:3px; padding:0.5rem 0.4rem; text-align:center;'>"
+            f"<div style='font-size:1.1rem; font-weight:700; color:#f87171;'>{err}</div>"
+            f"<div style='font-size:0.58rem; color:#7a8ba8; text-transform:uppercase; "
+            f"letter-spacing:0.1em;'>Error</div></div>"
+            f"<div style='flex:1; background:rgba(38,85,163,0.25); border:1px solid rgba(38,85,163,0.4); "
+            f"border-radius:3px; padding:0.5rem 0.4rem; text-align:center;'>"
+            f"<div style='font-size:1.1rem; font-weight:700; color:#93c5fd;'>{ok+err}</div>"
+            f"<div style='font-size:0.58rem; color:#7a8ba8; text-transform:uppercase; "
+            f"letter-spacing:0.1em;'>Total</div></div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.78rem; "
+            "color:#7a8ba8; padding:0.5rem 0 1rem 0; font-style:italic;'>"
+            "No data fetched yet.<br>Use the Settings panel above to fetch data.</div>",
+            unsafe_allow_html=True
+        )
+
+    # ── Divider ──
+    st.markdown("<hr style='border:none; border-top:1px solid rgba(255,255,255,0.08); margin:0.5rem 0 1rem 0;'>",
+                unsafe_allow_html=True)
+
+    # ── Spot prices mini-ticker ──
+    st.markdown(
+        "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.58rem; font-weight:600; "
+        "letter-spacing:0.16em; text-transform:uppercase; color:#7a8ba8; margin-bottom:0.6rem;'>"
+        "Spot Prices</div>",
+        unsafe_allow_html=True
+    )
+
+    TICKER_SYMBOLS = [
+        "Crude Oil (WTI)", "Brent Oil", "Natural Gas",
+        "Gold", "Silver", "Copper",
+        "S&P 500", "NASDAQ", "VIX",
+        "Bitcoin", "Ethereum",
+        "EUR/USD", "GBP/USD",
+    ]
+
+    if results:
+        tickers_shown = 0
+        for name in TICKER_SYMBOLS:
+            data = results.get(name, {})
+            if "price" in data:
+                price  = data["price"]
+                change = data.get("change", 0)
+                color  = "#4ade80" if change >= 0 else "#f87171"
+                arrow  = "▲" if change >= 0 else "▼"
+                st.markdown(
+                    f"<div style='display:flex; justify-content:space-between; align-items:center; "
+                    f"padding:0.28rem 0; border-bottom:1px solid rgba(255,255,255,0.05);'>"
+                    f"<span style='font-family:\"Source Sans 3\",sans-serif; font-size:0.72rem; "
+                    f"color:#b8c4d8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; "
+                    f"max-width:55%;'>{name}</span>"
+                    f"<span style='font-family:\"Source Code Pro\",monospace; font-size:0.72rem; "
+                    f"color:#e0e7f0; text-align:right;'>"
+                    f"${price:,.2f} <span style='color:{color}; font-size:0.65rem;'>{arrow}{abs(change):.2f}</span>"
+                    f"</span></div>",
+                    unsafe_allow_html=True
+                )
+                tickers_shown += 1
+        if tickers_shown == 0:
+            st.markdown(
+                "<div style='font-size:0.72rem; color:#4a5a70; font-style:italic;'>"
+                "Fetch price sources to see ticker.</div>",
+                unsafe_allow_html=True
+            )
+    else:
+        for name in TICKER_SYMBOLS[:6]:
+            st.markdown(
+                f"<div style='display:flex; justify-content:space-between; padding:0.28rem 0; "
+                f"border-bottom:1px solid rgba(255,255,255,0.05);'>"
+                f"<span style='font-size:0.72rem; color:#4a5a70;'>{name}</span>"
+                f"<span style='font-size:0.72rem; color:#4a5a70; font-family:\"Source Code Pro\",monospace;'>—</span>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
+    # ── Footer ──
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.6rem; "
+        "color:#3a4a60; line-height:1.6; border-top:1px solid rgba(255,255,255,0.06); "
+        "padding-top:0.8rem;'>"
+        "© 2026 Macro-Risk Intelligence Hub<br>"
+        "All data from public APIs.<br>"
+        "For informational purposes only."
+        "</div>",
+        unsafe_allow_html=True
+    )
 
 
 # ==========================================
