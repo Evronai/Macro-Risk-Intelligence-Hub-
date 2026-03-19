@@ -1958,20 +1958,35 @@ st.markdown("""
 # ── Settings panel — expander works on all devices ──
 with st.expander("⚙️ Settings & Data Sources", expanded=not bool(st.session_state.fetched_results)):
 
-    # API Key row
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        _key_input = st.text_input("DeepSeek API Key", type="password",
-                                   placeholder="sk-...", value=api_key or "",
-                                   label_visibility="collapsed",
-                                   help="Enter your DeepSeek API key for AI analysis")
-        if _key_input:
-            api_key = _key_input
-    with c2:
-        if api_key:
-            st.success("✓ API key set")
-        else:
-            st.warning("API key required")
+    # API Status row — read only, key comes from secrets
+    if api_key:
+        st.markdown(
+            "<div style='display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; "
+            "background:#edf7f2; border:1px solid #bbf7d0; border-left:3px solid #166534; "
+            "border-radius:3px; margin-bottom:0.5rem;'>"
+            "<span style='font-size:0.9rem;'>🔑</span>"
+            "<div>"
+            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.72rem; "
+            "font-weight:600; color:#166534; letter-spacing:0.04em;'>DeepSeek API — Connected</div>"
+            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.68rem; "
+            "color:#4a7a5a;'>Key loaded from Streamlit secrets</div>"
+            "</div></div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<div style='display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; "
+            "background:#fef3c7; border:1px solid #fde68a; border-left:3px solid #b45309; "
+            "border-radius:3px; margin-bottom:0.5rem;'>"
+            "<span style='font-size:0.9rem;'>⚠️</span>"
+            "<div>"
+            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.72rem; "
+            "font-weight:600; color:#b45309; letter-spacing:0.04em;'>DeepSeek API — Not configured</div>"
+            "<div style='font-family:\"Source Sans 3\",sans-serif; font-size:0.68rem; "
+            "color:#7a5a20;'>Add DEEPSEEK_API_KEY to .streamlit/secrets.toml</div>"
+            "</div></div>",
+            unsafe_allow_html=True
+        )
 
     st.divider()
 
@@ -2480,7 +2495,7 @@ if st.session_state.fetched_results:
 
     if generate_clicked:
         if not api_key:
-            st.error("A DeepSeek API key is required to generate analysis.")
+            st.error("DeepSeek API key not found. Add DEEPSEEK_API_KEY to .streamlit/secrets.toml and restart.")
         elif not st.session_state.fetched_results:
             st.warning("Please fetch data before generating a briefing.")
         else:
