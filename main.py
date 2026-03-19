@@ -996,13 +996,18 @@ class DataSourceManager:
 
     def _fetch_yfinance(self, source):
         ticker = yf.Ticker(source["symbol"])
-        hist = ticker.history(period="2d")
+        hist = ticker.history(period="30d")
         if hist.empty or len(hist) < 1:
             return {"error": "No data"}
-        price = hist['Close'].iloc[-1]
-        prev = hist['Close'].iloc[-2] if len(hist) >= 2 else price
-        change = price - prev
-        return {"price": round(price, 2), "change": round(change, 2)}
+        closes = [round(float(v), 4) for v in hist['Close'].tolist()]
+        price = closes[-1]
+        prev  = closes[-2] if len(closes) >= 2 else price
+        change = round(price - prev, 4)
+        return {
+            "price":  round(price, 2),
+            "change": round(change, 2),
+            "spark":  closes,   # list of up to ~22 daily closes
+        }
 
     def _fetch_rss(self, source):
         try:
@@ -1375,7 +1380,66 @@ def format_results_for_category(results: Dict, category: str) -> pd.DataFrame:
 
 
 # ==========================================
-# 7. PDF GENERATION FUNCTION
+# 7. SPARKLINE SVG GENERATOR
+# ==========================================
+def make_sparkline(values: list, color: str, width: int = 120, height: int = 36) -> str:
+    """
+    Generate an inline SVG sparkline from a list of price values.
+    Returns an SVG string ready to embed in HTML.
+    """
+    if not values or len(values) < 2:
+        return ""
+
+    mn, mx = min(values), max(values)
+    rng = mx - mn if mx != mn else 1.0
+
+    pad_x, pad_y = 2, 3
+    uw = width  - pad_x * 2
+    uh = height - pad_y * 2
+    n  = len(values)
+
+    # Build polyline points
+    pts = []
+    for i, v in enumerate(values):
+        x = pad_x + (i / (n - 1)) * uw
+        y = pad_y + (1 - (v - mn) / rng) * uh
+        pts.append(f"{x:.1f},{y:.1f}")
+    polyline = " ".join(pts)
+
+    # Filled area path (close back to baseline)
+    first_x = pad_x
+    last_x  = pad_x + uw
+    baseline = pad_y + uh
+    area_pts = f"{first_x:.1f},{baseline:.1f} " + polyline + f" {last_x:.1f},{baseline:.1f}"
+
+    # Determine fill/stroke opacity based on trend
+    fill_opacity = "0.08"
+    stroke_width = "1.5"
+
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" '
+        f'width="{width}" height="{height}" '
+        f'viewBox="0 0 {width} {height}" '
+        f'style="display:block; overflow:visible;">'
+        # Area fill
+        f'<polygon points="{area_pts}" '
+        f'fill="{color}" fill-opacity="{fill_opacity}" stroke="none"/>'
+        # Line
+        f'<polyline points="{polyline}" '
+        f'fill="none" stroke="{color}" '
+        f'stroke-width="{stroke_width}" '
+        f'stroke-linecap="round" stroke-linejoin="round"/>'
+        # End dot
+        f'<circle cx="{float(pts[-1].split(",")[0]):.1f}" '
+        f'cy="{float(pts[-1].split(",")[1]):.1f}" '
+        f'r="2.2" fill="{color}"/>'
+        f'</svg>'
+    )
+    return svg
+
+
+# ==========================================
+# 8. PDF GENERATION FUNCTION (renumbered)
 # ==========================================
 def generate_pdf_report(markdown_text: str, analysis_type: str) -> bytes:
     """Convert a markdown AI briefing to a styled Big 4-quality PDF."""
@@ -1806,15 +1870,17 @@ with st.sidebar:
                 change = data.get("change", 0)
                 color  = "#4ade80" if change >= 0 else "#f87171"
                 arrow  = "▲" if change >= 0 else "▼"
+                spark  = make_sparkline(data.get("spark", []), color, width=52, height=20)
                 st.markdown(
                     f"<div style='display:flex; justify-content:space-between; align-items:center; "
-                    f"padding:0.28rem 0; border-bottom:1px solid rgba(255,255,255,0.05);'>"
-                    f"<span style='font-family:\"Source Sans 3\",sans-serif; font-size:0.72rem; "
+                    f"padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.05); gap:0.3rem;'>"
+                    f"<span style='font-family:\"Source Sans 3\",sans-serif; font-size:0.7rem; "
                     f"color:#b8c4d8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; "
-                    f"max-width:55%;'>{name}</span>"
-                    f"<span style='font-family:\"Source Code Pro\",monospace; font-size:0.72rem; "
-                    f"color:#e0e7f0; text-align:right;'>"
-                    f"${price:,.2f} <span style='color:{color}; font-size:0.65rem;'>{arrow}{abs(change):.2f}</span>"
+                    f"flex:1; min-width:0;'>{name}</span>"
+                    f"<span style='flex-shrink:0;'>{spark}</span>"
+                    f"<span style='font-family:\"Source Code Pro\",monospace; font-size:0.7rem; "
+                    f"color:#e0e7f0; text-align:right; flex-shrink:0; white-space:nowrap;'>"
+                    f"${price:,.2f} <span style='color:{color}; font-size:0.62rem;'>{arrow}{abs(change):.2f}</span>"
                     f"</span></div>",
                     unsafe_allow_html=True
                 )
@@ -1966,16 +2032,53 @@ if st.session_state.fetched_results:
 
     price_sources = [(name, data) for name, data in results.items()
                      if isinstance(data, dict) and "price" in data]
-    if price_sources:
-        cols = st.columns(2)
-        for i, (name, data) in enumerate(price_sources[:8]):
-            with cols[i % 2]:
-                st.metric(
-                    label=name,
-                    value=f"${data['price']:,.2f}",
-                    delta=f"{data.get('change', 0):+.2f}",
-                    delta_color="normal"
-                )
+
+    # Featured tickers for snapshot row
+    SNAPSHOT_NAMES = [
+        "Crude Oil (WTI)", "Brent Oil", "Natural Gas", "Gold",
+        "Silver", "S&P 500", "NASDAQ", "VIX",
+        "Bitcoin", "Ethereum", "EUR/USD", "GBP/USD",
+    ]
+    snapshot_sources = [(n, results[n]) for n in SNAPSHOT_NAMES
+                        if n in results and "price" in results[n]]
+    if not snapshot_sources:
+        snapshot_sources = price_sources
+
+    if snapshot_sources:
+        cols = st.columns(4)
+        for i, (name, data) in enumerate(snapshot_sources[:12]):
+            price  = data["price"]
+            change = data.get("change", 0)
+            pct    = (change / (price - change) * 100) if (price - change) != 0 else 0
+            color  = "#1a7a4a" if change >= 0 else "#c0392b"
+            arrow  = "▲" if change >= 0 else "▼"
+            spark  = make_sparkline(data.get("spark", []), color, width=100, height=28)
+            with cols[i % 4]:
+                st.markdown(f"""
+                <div style="background:#ffffff; border:1px solid #e2e6ed;
+                            border-top:3px solid {color};
+                            border-radius:3px; padding:0.75rem 0.9rem 0.6rem 0.9rem;
+                            margin-bottom:0.8rem; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                    <div style="font-family:'Source Sans 3',sans-serif; font-size:0.62rem;
+                                font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+                                color:#8a95a3; margin-bottom:0.2rem; white-space:nowrap;
+                                overflow:hidden; text-overflow:ellipsis;"
+                         title="{name}">{name}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                        <div>
+                            <div style="font-family:'Source Code Pro',monospace; font-size:1.15rem;
+                                        font-weight:500; color:#0f1923; line-height:1.1;">
+                                ${price:,.2f}</div>
+                            <div style="font-family:'Source Code Pro',monospace; font-size:0.72rem;
+                                        font-weight:600; color:{color}; margin-top:0.15rem;">
+                                {arrow} {change:+.2f}
+                                <span style="font-weight:400; font-size:0.65rem;">({pct:+.2f}%)</span>
+                            </div>
+                        </div>
+                        <div style="flex-shrink:0;">{spark}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
     else:
         st.info("No price data available. Select sources and fetch data.")
 
@@ -2066,35 +2169,44 @@ if st.session_state.fetched_results:
                         row_items = price_items[row_start:row_start + cols_per_row]
                         cols = st.columns(cols_per_row)
                         for col, (name, data) in zip(cols, row_items):
-                            price = data["price"]
+                            price  = data["price"]
                             change = data.get("change", 0)
                             change_str = f"{change:+.2f}"
-                            color = _change_color(str(change))
-                            arrow = _change_arrow(str(change))
-                            pct = (change / (price - change) * 100) if (price - change) != 0 else 0
+                            color  = _change_color(str(change))
+                            arrow  = _change_arrow(str(change))
+                            pct    = (change / (price - change) * 100) if (price - change) != 0 else 0
+                            spark  = make_sparkline(data.get("spark", []), color, width=110, height=32)
                             with col:
                                 st.markdown(f"""
                                 <div style="background:#ffffff; border:1px solid #e2e6ed;
                                             border-left:3px solid {meta['color']}; border-radius:3px;
-                                            padding:0.9rem 1rem; margin-bottom:0.8rem;
+                                            padding:0.75rem 0.9rem 0.6rem 0.9rem; margin-bottom:0.8rem;
                                             box-shadow:0 1px 3px rgba(0,0,0,0.06);">
                                     <div style="font-family:'Source Sans 3',sans-serif;
-                                                font-size:0.65rem; font-weight:600; letter-spacing:0.12em;
+                                                font-size:0.63rem; font-weight:600; letter-spacing:0.12em;
                                                 text-transform:uppercase; color:#8a95a3;
-                                                margin-bottom:0.35rem; white-space:nowrap;
+                                                margin-bottom:0.25rem; white-space:nowrap;
                                                 overflow:hidden; text-overflow:ellipsis;"
                                          title="{name}">{name}</div>
-                                    <div style="font-family:'Source Code Pro',monospace;
-                                                font-size:1.25rem; font-weight:500; color:#0f1923;
-                                                line-height:1.1; margin-bottom:0.3rem;">
-                                        ${price:,.2f}
-                                    </div>
-                                    <div style="font-family:'Source Code Pro',monospace;
-                                                font-size:0.78rem; font-weight:600; color:{color};">
-                                        {arrow} {change_str} &nbsp;
-                                        <span style="font-weight:400; font-size:0.72rem;">
-                                            ({pct:+.2f}%)
-                                        </span>
+                                    <div style="display:flex; justify-content:space-between;
+                                                align-items:flex-end; gap:0.5rem;">
+                                        <div>
+                                            <div style="font-family:'Source Code Pro',monospace;
+                                                        font-size:1.18rem; font-weight:500; color:#0f1923;
+                                                        line-height:1.1; margin-bottom:0.2rem;">
+                                                ${price:,.2f}
+                                            </div>
+                                            <div style="font-family:'Source Code Pro',monospace;
+                                                        font-size:0.74rem; font-weight:600; color:{color};">
+                                                {arrow} {change_str}
+                                                <span style="font-weight:400; font-size:0.68rem;">
+                                                    ({pct:+.2f}%)
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div style="flex-shrink:0; opacity:0.9;">
+                                            {spark}
+                                        </div>
                                     </div>
                                 </div>
                                 """, unsafe_allow_html=True)
